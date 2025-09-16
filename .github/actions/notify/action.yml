@@ -14,7 +14,8 @@ runs:
   steps:
     - name: Ensure jq
       shell: bash
-      run: sudo apt-get update && sudo apt-get install -y jq
+      run: |
+        sudo apt-get update && sudo apt-get install -y jq
 
     - name: Build EVENT JSON file
       shell: bash
@@ -33,6 +34,21 @@ runs:
           --arg nt "${{ inputs.notes }}" \
           '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,
             links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
+        echo "Built event.json:"
+        cat event.json
+
+    - name: Validate secrets & URLs
+      shell: bash
+      env:
+        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+      run: |
+        fail() { echo "❌ $1"; exit 1; }
+        [ -n "$EVENT_WEBHOOK" ] || fail "EVENT_WEBHOOK is empty (Actions secret missing)."
+        [ -n "$SLACK_WEBHOOK" ] || fail "SLACK_WEBHOOK is empty (Actions secret missing)."
+        [[ "$EVENT_WEBHOOK" =~ ^https?:// ]] || fail "EVENT_WEBHOOK is not a valid URL."
+        [[ "$SLACK_WEBHOOK" =~ ^https?:// ]]  || fail "SLACK_WEBHOOK is not a valid URL."
+        echo "✅ secrets look valid."
 
     - name: Send EVENT JSON (signed)
       shell: bash
@@ -44,7 +60,7 @@ runs:
           -H "Content-Type: application/json" \
           -H "x-event-secret: $EVENT_SECRET" \
           --data-binary @event.json \
-          --max-time 10 --retry 2 --retry-delay 2
+          --max-time 15 --retry 2 --retry-delay 2
 
     - name: Send Slack one-liner
       shell: bash
@@ -52,10 +68,9 @@ runs:
         SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
       run: |
         MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
-        # 안전한 이스케이프
         ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
         curl -sS -X POST "$SLACK_WEBHOOK" \
           -H "Content-Type: application/json" \
           --data "{\"text\":$ESCAPED}" \
-          --max-time 10 --retry 2 --retry-delay 2
+          --max-time 15 --retry 2 --retry-delay 2
 
