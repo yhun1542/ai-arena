@@ -18,7 +18,7 @@ jobs:
         uses: amondnet/vercel-action@v41.1.4
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod --yes'
+          vercel-args: '--prod --yes --force'
           working-directory: .
         timeout-minutes: 5
       - name: Notify PM (Deploy)
