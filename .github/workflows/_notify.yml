@@ -18,10 +18,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Build payloads
-        id: make
         run: |
           TS=$(date -Iseconds)
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+          # ① EVENT JSON → 파일 저장 (output 사용 안 함)
           jq -n \
             --arg t "${{ inputs.ticket }}" \
             --arg a "${{ inputs.actor }}" \
@@ -32,9 +33,13 @@ jobs:
             --arg run "$RUN_URL" \
             --arg pv "${{ inputs.preview }}" \
             --arg nt "${{ inputs.notes }}" \
-            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,
-              links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
-          echo "SLACK=${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}" >> $GITHUB_OUTPUT
+            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' \
+            > event.json
+
+          # ② Slack 원라이너는 안전 이스케이프해서 GITHUB_ENV 로 전달
+          MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
+          ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
+          echo "SLACK_ESCAPED=$ESCAPED" >> $GITHUB_ENV
 
       - name: Send EVENT JSON
         run: |
@@ -48,6 +53,6 @@ jobs:
         run: |
           curl -sS -X POST "${{ secrets.SLACK_WEBHOOK }}" \
             -H "Content-Type: application/json" \
-            --data "{\"text\":\"${{ steps.make.outputs.SLACK }}\"}" \
+            --data "{\"text\":${SLACK_ESCAPED}}" \
             --max-time 10 --retry 2 --retry-delay 2
 
