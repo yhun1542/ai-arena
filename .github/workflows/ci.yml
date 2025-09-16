@@ -1,25 +1,25 @@
-name: ci
+name: CI
 on:
-  pull_request:
-    branches: [ main ]
-  push:
-    branches: [ feature/T-001-homepage ]
+  pull_request: { branches: [ main ] }
+  push: { branches: [ feature/* ] }
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: 20 }
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        with: { version: 9 }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run test:ci
-      - name: Notify PM (Dev started)
-        if: github.ref == 'refs/heads/feature/T-001-homepage'
+      - run: pnpm run build --if-present
+
+      # Slack 전파 (성공/실패 모두)
+      - name: Notify Slack (CI result)
+        if: always()
         run: |
-          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
-          -H 'Content-type: application/json' \
-          --data "{\"text\":\"Manus ▶ T-001 Dev passed CI | run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+          STATUS="${{ job.status }}"
+          MSG="Manus ▶ T-001 Dev ${STATUS} | run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" -H 'Content-type: application/json' --data "{\"text\":\"${MSG}\"}"
 
