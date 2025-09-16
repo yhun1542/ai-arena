@@ -14,6 +14,9 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Build payloads
         id: make
         run: |
@@ -32,16 +35,22 @@ jobs:
             '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}')
           echo "EVENT=$EVENT" >> $GITHUB_OUTPUT
           SLACK="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
-          echo "SLACK=$SLACK" >> $GITHUB_OUTPUT
+          # 따옴표/개행 이스케이프
+          SLACK_ESCAPED=$(printf '%s' "$SLACK" | jq -Rsa .)
+          echo "SLACK_ESCAPED=$SLACK_ESCAPED" >> $GITHUB_OUTPUT
 
-      - name: Send EVENT JSON
+      - name: Send EVENT JSON (with signature)
         run: |
           curl -sS -X POST "${{ secrets.EVENT_WEBHOOK }}" \
             -H "Content-Type: application/json" \
-            -d '${{ steps.make.outputs.EVENT }}'
+            -H "x-event-secret: ${{ secrets.EVENT_SECRET }}" \
+            --data '${{ steps.make.outputs.EVENT }}' \
+            --max-time 10 --retry 2 --retry-delay 2
+
       - name: Send Slack one-liner
         run: |
           curl -sS -X POST "${{ secrets.SLACK_WEBHOOK }}" \
             -H "Content-Type: application/json" \
-            --data "{\"text\":\"${{ steps.make.outputs.SLACK }}\"}"
+            --data "{\"text\":${{ steps.make.outputs.SLACK_ESCAPED }}}" \
+            --max-time 10 --retry 2 --retry-delay 2
 
