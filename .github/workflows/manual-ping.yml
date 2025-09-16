@@ -6,18 +6,65 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Notify (Manual)
-        uses: ./.github/actions/notify
-        with:
-          ticket: "T-000"
-          actor: "ChatGPT"
-          phase: "Ops"
-          status: "updated"
-          notes: "Manual sync ping"
+      - name: Send notifications
+        run: |
+          echo "=== Manual Ping Notification ==="
+          echo "Ticket: T-000"
+          echo "Actor: ChatGPT"
+          echo "Phase: Ops"
+          echo "Status: updated"
+          echo "Notes: Manual sync ping"
+          
+          # Create event JSON
+          cat > event.json << 'EOF'
+          {
+            "ticket_id": "T-000",
+            "actor": "ChatGPT",
+            "phase": "Ops",
+            "status": "updated",
+            "ts": "$(date -Iseconds)",
+            "links": {
+              "run": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            },
+            "notes": "Manual sync ping"
+          }
+          EOF
+          
+          # Replace timestamp
+          sed -i "s/\$(date -Iseconds)/$(date -Iseconds)/" event.json
+          
+          echo "Event JSON created:"
+          cat event.json
+          
+          # Send to Slack if webhook is available
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            echo "Sending to Slack..."
+            MSG="ChatGPT ▶ T-000 Ops updated | Manual sync ping"
+            curl -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"text\":\"$MSG\"}" \
+              --max-time 10 --retry 2 || echo "Slack notification failed"
+          else
+            echo "SLACK_WEBHOOK not set, skipping Slack notification"
+          fi
+          
+          # Send to Supabase if webhook is available
+          if [ -n "$EVENT_WEBHOOK" ] && [ -n "$SUPABASE_ANON_KEY" ] && [ -n "$EVENT_SECRET" ]; then
+            echo "Sending to Supabase..."
+            curl -X POST "$EVENT_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              -H "x-event-secret: $EVENT_SECRET" \
+              -d @event.json \
+              --max-time 10 --retry 2 || echo "Supabase notification failed"
+          else
+            echo "Supabase credentials not complete, skipping Supabase notification"
+          fi
+          
+          echo "=== Notifications completed ==="
         env:
-          EVENT_WEBHOOK:     ${{ secrets.EVENT_WEBHOOK }}
-          EVENT_SECRET:      ${{ secrets.EVENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SLACK_WEBHOOK:     ${{ secrets.SLACK_WEBHOOK }}
+          EVENT_SECRET: ${{ secrets.EVENT_SECRET }}
 
