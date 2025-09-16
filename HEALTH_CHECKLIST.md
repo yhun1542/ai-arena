@@ -69,3 +69,22 @@ GitHub 저장소 → Settings → Secrets and variables → Actions → New repo
 
 모든 시스템이 준비되었습니다! 🎉
 
+
+## 🔧 최신 개선 사항
+
+### JSON 파일 처리 최적화 ✅
+- **방식**: JSON을 `event.json` 파일로 저장 후 `--data-binary @event.json`로 전송
+- **장점**: 출력 파싱 문제 완전 해결, 더 안전한 JSON 처리
+- **개선**: 환경변수 이스케이프 불필요, 바이너리 전송으로 안정성 향상
+
+### 처리 흐름
+1. **jq**로 JSON 생성 → `event.json` 파일 저장
+2. **curl**에서 `--data-binary @event.json`로 파일 직접 전송
+3. **Slack 메시지**는 단순 문자열로 별도 처리
+
+### 기술적 장점
+- ✅ **파싱 에러 방지**: 복잡한 JSON 구조도 안전하게 처리
+- ✅ **메모리 효율**: 대용량 JSON도 파일 스트림으로 처리
+- ✅ **디버깅 용이**: event.json 파일로 전송 데이터 확인 가능
+- ✅ **특수문자 안전**: 바이너리 전송으로 인코딩 문제 없음
+
