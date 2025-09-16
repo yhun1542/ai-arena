@@ -1,0 +1,25 @@
+name: Status Pulse
+on:
+  schedule:
+    - cron: '0 * * * *'    # 매 정시 (UTC 기준)
+  workflow_dispatch:
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Summarize open PRs and recent runs
+        id: sum
+        run: |
+          echo "REPORT=$(printf 'Manus ▶ T-001 Pulse | open PRs: %s, latest run: %s' \
+            "$(gh pr list --json number --jq 'length' || echo '?')" \
+            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions" )" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Notify Slack (Pulse)
+        run: |
+          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+          -H 'Content-type: application/json' \
+          --data "{\"text\":\"${{ steps.sum.outputs.REPORT }}\"}"
+

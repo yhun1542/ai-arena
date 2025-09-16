@@ -58,3 +58,31 @@ Claude ▶ T-003 Review failed | PR needs security fixes
 - **락파일**: pnpm-lock.yaml (반드시 커밋)
 - **package.json**: `"packageManager": "pnpm@9"` 필드 포함
 
+
+
+## 폴백 수집 (누락 방지용)
+
+### Status Pulse 워크플로우
+- **파일**: `.github/workflows/status-pulse.yml`
+- **스케줄**: 매 정시 (UTC 기준) - `0 * * * *`
+- **수동 실행**: workflow_dispatch 지원
+- **목적**: 웹훅 누락 시에도 최소 시간당 1회 상태 파악 메시지 보장
+
+### Pulse 메시지 형식
+```
+Manus ▶ T-001 Pulse | open PRs: {수}, latest run: {링크}
+```
+
+### 예시
+```
+Manus ▶ T-001 Pulse | open PRs: 2, latest run: https://github.com/yhun1542/ai-arena/actions
+Manus ▶ T-001 Pulse | open PRs: 0, latest run: https://github.com/yhun1542/ai-arena/actions
+```
+
+### 수집 정보
+- **Open PRs**: 현재 열린 Pull Request 수
+- **Latest Run**: 최근 Actions 실행 링크
+- **실행 주기**: 매시간 정각 (UTC)
+
+이 시스템은 다른 알림이 실패하더라도 프로젝트 상태를 지속적으로 모니터링할 수 있도록 보장합니다.
+
