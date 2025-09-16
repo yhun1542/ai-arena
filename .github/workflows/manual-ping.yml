@@ -4,12 +4,20 @@ on:
 
 jobs:
   ping:
-    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
-    with:
-      ticket: "T-000"
-      actor: "ChatGPT"
-      phase: "Ops"
-      status: "updated"
-      notes: "Manual sync ping"
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Notify (Manual)
+        uses: ./.github/actions/notify
+        with:
+          ticket: "T-000"
+          actor: "ChatGPT"
+          phase: "Ops"
+          status: "updated"
+          notes: "Manual sync ping"
+        env:
+          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
+          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
