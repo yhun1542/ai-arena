@@ -14,12 +14,12 @@ jobs:
           version: latest
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - name: Deploy with Vercel
-        uses: amondnet/vercel-action@v41.1.4
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod --yes --name ai-arena'
-          working-directory: .
+      - name: Deploy to Vercel
+        run: |
+          npm i -g vercel@latest
+          vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }} --name ai-arena
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         timeout-minutes: 5
       - name: Notify PM (Deploy)
         if: success()
