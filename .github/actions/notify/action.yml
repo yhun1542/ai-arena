@@ -53,42 +53,34 @@ runs:
         echo "Built event.json:"
         cat event.json
 
-    - name: Validate & sanitize secrets
+    - name: Validate secrets
       shell: bash
-      env:
-        EVENT_WEBHOOK_RAW: ${{ env.EVENT_WEBHOOK }}
-        SLACK_WEBHOOK_RAW: ${{ env.SLACK_WEBHOOK }}
       run: |
-        fail(){ echo "❌ $1"; exit 1; }
-        
-        sanitize() {
-          v="$1"
-          v="${v//$'\r'/}"; v="${v//$'\n'/}"
-          v="$(echo -n "$v" | sed -e 's/^ *//' -e 's/ *$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/")"
-          echo -n "$v"
-        }
-        
-        EVENT_WEBHOOK="$(sanitize "$EVENT_WEBHOOK_RAW")"
-        SLACK_WEBHOOK="$(sanitize "$SLACK_WEBHOOK_RAW")"
-        
-        [ -n "$EVENT_WEBHOOK" ] || fail "EVENT_WEBHOOK empty"
-        [ -n "$SLACK_WEBHOOK" ] || fail "SLACK_WEBHOOK empty"
-        [[ "$EVENT_WEBHOOK" =~ ^https?://[^[:space:]]+$ ]] || fail "EVENT_WEBHOOK invalid URL"
-        [[ "$SLACK_WEBHOOK" =~ ^https?://[^[:space:]]+$ ]] || fail "SLACK_WEBHOOK invalid URL"
-        
-        echo "✅ secrets look valid & sanitized"
-        echo "EVENT_WEBHOOK_SHA256: $(echo -n "$EVENT_WEBHOOK" | sha256sum | cut -d' ' -f1)"
-        echo "SLACK_WEBHOOK_SHA256: $(echo -n "$SLACK_WEBHOOK" | sha256sum | cut -d' ' -f1)"
-        
-        echo "EVENT_WEBHOOK=$EVENT_WEBHOOK" >> $GITHUB_ENV
-        echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
-
-    - name: Send EVENT JSON (signed + JWT)
-      shell: bash
+        if [ -z "$EVENT_WEBHOOK" ]; then
+          echo "❌ EVENT_WEBHOOK is empty"
+          exit 1
+        fi
+        if [ -z "$SLACK_WEBHOOK" ]; then
+          echo "❌ SLACK_WEBHOOK is empty"
+          exit 1
+        fi
+        if [ -z "$SUPABASE_ANON_KEY" ]; then
+          echo "❌ SUPABASE_ANON_KEY is empty"
+          exit 1
+        fi
+        if [ -z "$EVENT_SECRET" ]; then
+          echo "❌ EVENT_SECRET is empty"
+          exit 1
+        fi
+        echo "✅ All secrets are present"
       env:
         EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
-        EVENT_SECRET: ${{ env.EVENT_SECRET }}
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
         SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+        EVENT_SECRET: ${{ env.EVENT_SECRET }}
+
+    - name: Send EVENT JSON
+      shell: bash
       run: |
         curl -sS -X POST "$EVENT_WEBHOOK" \
           -H "Content-Type: application/json" \
@@ -96,11 +88,13 @@ runs:
           -H "x-event-secret: $EVENT_SECRET" \
           --data-binary @event.json \
           --max-time 15 --retry 2 --retry-delay 2
-
-    - name: Send Slack one-liner
-      shell: bash
       env:
-        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
+        EVENT_SECRET: ${{ env.EVENT_SECRET }}
+        SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+
+    - name: Send Slack message
+      shell: bash
       run: |
         MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
         ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
@@ -108,4 +102,6 @@ runs:
           -H "Content-Type: application/json" \
           --data "{\"text\":$ESCAPED}" \
           --max-time 15 --retry 2 --retry-delay 2
+      env:
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
 
