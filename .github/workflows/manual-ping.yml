@@ -4,7 +4,6 @@ on:
 
 jobs:
   ping:
-    # ✅ steps가 아니라 jobs.<id>.uses 에서 호출
     uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
     with:
       ticket: "T-000"
@@ -12,6 +11,5 @@ jobs:
       phase: "Ops"
       status: "updated"
       notes: "Manual sync ping"
-    # ✅ secrets는 job 레벨에서만 사용 가능
     secrets: inherit
 
