@@ -1,13 +1,30 @@
 name: "Notify (EVENT + Slack)"
 description: "Send EVENT JSON to EVENT_WEBHOOK and one-liner to Slack"
 inputs:
-  ticket:  { required: true,  description: "Ticket ID" }
-  actor:   { required: true,  description: "Actor" }
-  phase:   { required: true,  description: "Phase" }
-  status:  { required: true,  description: "Status" }
-  notes:   { required: false, default: "" }
-  pr:      { required: false, default: "" }
-  preview: { required: false, default: "" }
+  ticket:
+    required: true
+    description: "Ticket ID"
+  actor:
+    required: true
+    description: "Actor"
+  phase:
+    required: true
+    description: "Phase"
+  status:
+    required: true
+    description: "Status"
+  notes:
+    required: false
+    default: ""
+    description: "Notes"
+  pr:
+    required: false
+    default: ""
+    description: "PR URL"
+  preview:
+    required: false
+    default: ""
+    description: "Preview URL"
 
 runs:
   using: "composite"
@@ -32,8 +49,7 @@ runs:
           --arg run "$RUN_URL" \
           --arg pv "${{ inputs.preview }}" \
           --arg nt "${{ inputs.notes }}" \
-          '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,
-            links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
+          '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
         echo "Built event.json:"
         cat event.json
 
@@ -44,43 +60,35 @@ runs:
         SLACK_WEBHOOK_RAW: ${{ env.SLACK_WEBHOOK }}
       run: |
         fail(){ echo "❌ $1"; exit 1; }
-
-        # 개행/캐리지리턴 제거 + 앞뒤 공백/따옴표 제거
+        
         sanitize() {
           v="$1"
           v="${v//$'\r'/}"; v="${v//$'\n'/}"
           v="$(echo -n "$v" | sed -e 's/^ *//' -e 's/ *$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/")"
           echo -n "$v"
         }
-
+        
         EVENT_WEBHOOK="$(sanitize "$EVENT_WEBHOOK_RAW")"
         SLACK_WEBHOOK="$(sanitize "$SLACK_WEBHOOK_RAW")"
-
+        
         [ -n "$EVENT_WEBHOOK" ] || fail "EVENT_WEBHOOK empty"
         [ -n "$SLACK_WEBHOOK" ] || fail "SLACK_WEBHOOK empty"
         [[ "$EVENT_WEBHOOK" =~ ^https?://[^[:space:]]+$ ]] || fail "EVENT_WEBHOOK invalid URL"
-        [[ "$SLACK_WEBHOOK" =~ ^https?://[^[:space:]]+$ ]]  || fail "SLACK_WEBHOOK invalid URL"
-
-        # 노출 없이 값이 바뀌었는지 확인(해시만 출력)
-        python - <<'PY'
-import os,hashlib
-def h(k): 
-    v=os.environ.get(k,'').encode()
-    print(k+'_SHA256', hashlib.sha256(v).hexdigest())
-print('✅ secrets look valid & sanitized')
-h('EVENT_WEBHOOK'); h('SLACK_WEBHOOK')
-PY
-
-        # 이후 스텝이 쓰도록 env에 클린 값 주입
+        [[ "$SLACK_WEBHOOK" =~ ^https?://[^[:space:]]+$ ]] || fail "SLACK_WEBHOOK invalid URL"
+        
+        echo "✅ secrets look valid & sanitized"
+        echo "EVENT_WEBHOOK_SHA256: $(echo -n "$EVENT_WEBHOOK" | sha256sum | cut -d' ' -f1)"
+        echo "SLACK_WEBHOOK_SHA256: $(echo -n "$SLACK_WEBHOOK" | sha256sum | cut -d' ' -f1)"
+        
         echo "EVENT_WEBHOOK=$EVENT_WEBHOOK" >> $GITHUB_ENV
         echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
 
     - name: Send EVENT JSON (signed + JWT)
       shell: bash
       env:
-        EVENT_WEBHOOK:       ${{ env.EVENT_WEBHOOK }}
-        EVENT_SECRET:        ${{ env.EVENT_SECRET }}
-        SUPABASE_ANON_KEY:   ${{ env.SUPABASE_ANON_KEY }}
+        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
+        EVENT_SECRET: ${{ env.EVENT_SECRET }}
+        SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
       run: |
         curl -sS -X POST "$EVENT_WEBHOOK" \
           -H "Content-Type: application/json" \
