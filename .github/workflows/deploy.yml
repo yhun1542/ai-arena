@@ -14,10 +14,13 @@ jobs:
           version: 9
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - uses: amondnet/vercel-action@v25
+      - name: Deploy with Vercel
+        uses: amondnet/vercel-action@v41.1.4
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: '--prod --yes --debug'
           working-directory: .
         timeout-minutes: 5
       - name: Notify PM (Deploy)
