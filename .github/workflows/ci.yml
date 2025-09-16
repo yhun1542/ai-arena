@@ -15,17 +15,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build --if-present
 
-      - name: Notify (CI result)
-        if: always()
-        uses: ./.github/actions/notify
-        with:
-          ticket:  "T-001"
-          actor:   "Manus"
-          phase:   "Dev"
-          status:  "${{ job.status }}"
-          notes:   "CI ${{ job.status }}"
-        env:
-          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
-          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  notify:
+    needs: build-test
+    if: always()
+    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Dev"
+      status: "${{ needs.build-test.result }}"
+      notes: "CI ${{ needs.build-test.result }}"
+    secrets: inherit
 

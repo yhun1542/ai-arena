@@ -7,6 +7,8 @@ on:
 jobs:
   pulse:
     runs-on: ubuntu-latest
+    outputs:
+      pr_count: ${{ steps.sum.outputs.PR_COUNT }}
     steps:
       - uses: actions/checkout@v4
       - name: Summarize open PRs and recent runs
@@ -17,17 +19,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Notify (Status Pulse)
-        if: always()
-        uses: ./.github/actions/notify
-        with:
-          ticket:  "T-001"
-          actor:   "Manus"
-          phase:   "Ops"
-          status:  "updated"
-          notes:   "Pulse | open PRs: ${{ steps.sum.outputs.PR_COUNT || '?' }}, latest run"
-        env:
-          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
-          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  notify:
+    needs: pulse
+    if: always()
+    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Ops"
+      status: "updated"
+      notes: "Pulse | open PRs: ${{ needs.pulse.outputs.pr_count || '?' }}, latest run"
+    secrets: inherit
 

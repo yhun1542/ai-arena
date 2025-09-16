@@ -17,18 +17,17 @@ jobs:
         run: |
           npm i -g vercel@latest
           vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
-      - name: Notify (Deploy result)
-        if: always()
-        uses: ./.github/actions/notify
-        with:
-          ticket:  "T-001"
-          actor:   "Manus"
-          phase:   "Deploy"
-          status:  "${{ job.status }}"
-          notes:   "Vercel ${{ job.status }}"
-          preview: "https://ai-arena.vercel.app"
-        env:
-          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
-          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+  notify:
+    needs: vercel
+    if: always()
+    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Deploy"
+      status: "${{ needs.vercel.result }}"
+      notes: "Vercel ${{ needs.vercel.result }}"
+      preview: "https://ai-arena.vercel.app"
+    secrets: inherit
 
