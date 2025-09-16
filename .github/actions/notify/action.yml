@@ -75,14 +75,16 @@ PY
         echo "EVENT_WEBHOOK=$EVENT_WEBHOOK" >> $GITHUB_ENV
         echo "SLACK_WEBHOOK=$SLACK_WEBHOOK" >> $GITHUB_ENV
 
-    - name: Send EVENT JSON (signed)
+    - name: Send EVENT JSON (signed + JWT)
       shell: bash
       env:
-        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
-        EVENT_SECRET:  ${{ env.EVENT_SECRET }}
+        EVENT_WEBHOOK:       ${{ env.EVENT_WEBHOOK }}
+        EVENT_SECRET:        ${{ env.EVENT_SECRET }}
+        SUPABASE_ANON_KEY:   ${{ env.SUPABASE_ANON_KEY }}
       run: |
         curl -sS -X POST "$EVENT_WEBHOOK" \
           -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
           -H "x-event-secret: $EVENT_SECRET" \
           --data-binary @event.json \
           --max-time 15 --retry 2 --retry-delay 2

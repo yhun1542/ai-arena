@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Notify (Manual)
         uses: ./.github/actions/notify
         with:
@@ -17,7 +16,8 @@ jobs:
           status: "updated"
           notes: "Manual sync ping"
         env:
-          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
-          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          EVENT_WEBHOOK:     ${{ secrets.EVENT_WEBHOOK }}
+          EVENT_SECRET:      ${{ secrets.EVENT_SECRET }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SLACK_WEBHOOK:     ${{ secrets.SLACK_WEBHOOK }}
 
