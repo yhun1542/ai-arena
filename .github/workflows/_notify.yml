@@ -1,0 +1,47 @@
+name: Notify
+on:
+  workflow_call:
+    inputs:
+      ticket:   { required: true, type: string }
+      actor:    { required: true, type: string }
+      phase:    { required: true, type: string }
+      status:   { required: true, type: string }
+      notes:    { required: false, type: string, default: "" }
+      pr:       { required: false, type: string, default: "" }
+      preview:  { required: false, type: string, default: "" }
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build payloads
+        id: make
+        run: |
+          TS=$(date -Iseconds)
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          EVENT=$(jq -n \
+            --arg t "${{ inputs.ticket }}" \
+            --arg a "${{ inputs.actor }}" \
+            --arg p "${{ inputs.phase }}" \
+            --arg s "${{ inputs.status }}" \
+            --arg ts "$TS" \
+            --arg pr "${{ inputs.pr }}" \
+            --arg run "$RUN_URL" \
+            --arg pv "${{ inputs.preview }}" \
+            --arg nt "${{ inputs.notes }}" \
+            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}')
+          echo "EVENT=$EVENT" >> $GITHUB_OUTPUT
+          SLACK="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
+          echo "SLACK=$SLACK" >> $GITHUB_OUTPUT
+
+      - name: Send EVENT JSON
+        run: |
+          curl -sS -X POST "${{ secrets.EVENT_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '${{ steps.make.outputs.EVENT }}'
+      - name: Send Slack one-liner
+        run: |
+          curl -sS -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            --data "{\"text\":\"${{ steps.make.outputs.SLACK }}\"}"
+

@@ -86,3 +86,54 @@ Manus ▶ T-001 Pulse | open PRs: 0, latest run: https://github.com/yhun1542/ai-
 
 이 시스템은 다른 알림이 실패하더라도 프로젝트 상태를 지속적으로 모니터링할 수 있도록 보장합니다.
 
+
+## 재사용 가능한 알림 워크플로우
+
+### _notify.yml 워크플로우
+- **파일**: `.github/workflows/_notify.yml`
+- **타입**: Reusable workflow (workflow_call)
+- **기능**: 이벤트 JSON과 Slack 한 줄 메시지 동시 전송
+
+### 입력 파라미터
+```yaml
+inputs:
+  ticket:   { required: true, type: string }    # 예) T-001
+  actor:    { required: true, type: string }    # 예) Manus
+  phase:    { required: true, type: string }    # 예) Dev, Deploy, Ops
+  status:   { required: true, type: string }    # 예) passed, failed
+  notes:    { required: false, type: string }   # 예) CI passed
+  pr:       { required: false, type: string }   # PR URL (선택)
+  preview:  { required: false, type: string }   # Preview URL (선택)
+```
+
+### 사용 방법
+```yaml
+jobs:
+  notify:
+    needs: [previous-job]
+    if: always()
+    uses: ./.github/workflows/_notify.yml
+    secrets: inherit
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Dev"
+      status: "${{ needs.previous-job.result }}"
+      notes: "CI ${{ needs.previous-job.result }}"
+```
+
+### 전송 채널
+1. **EVENT_WEBHOOK**: 구조화된 JSON 이벤트 데이터
+2. **SLACK_WEBHOOK**: 한 줄 요약 메시지
+
+### 필수 Secrets
+- `EVENT_WEBHOOK`: 이벤트 JSON 전송용 웹훅 URL
+- `SLACK_WEBHOOK`: Slack 알림용 웹훅 URL
+
+### 적용된 워크플로우
+- ✅ **CI**: Dev 단계 알림
+- ✅ **Deploy**: Deploy 단계 알림
+- ✅ **Status Pulse**: Ops 단계 알림
+
+이 시스템으로 모든 워크플로우에서 일관된 알림 형식과 이중 채널 전송이 보장됩니다.
+
