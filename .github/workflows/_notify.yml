@@ -22,7 +22,7 @@ jobs:
         run: |
           TS=$(date -Iseconds)
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          EVENT=$(jq -n \
+          jq -n \
             --arg t "${{ inputs.ticket }}" \
             --arg a "${{ inputs.actor }}" \
             --arg p "${{ inputs.phase }}" \
@@ -32,25 +32,22 @@ jobs:
             --arg run "$RUN_URL" \
             --arg pv "${{ inputs.preview }}" \
             --arg nt "${{ inputs.notes }}" \
-            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}')
-          echo "EVENT=$EVENT" >> $GITHUB_OUTPUT
-          SLACK="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
-          # 따옴표/개행 이스케이프
-          SLACK_ESCAPED=$(printf '%s' "$SLACK" | jq -Rsa .)
-          echo "SLACK_ESCAPED=$SLACK_ESCAPED" >> $GITHUB_OUTPUT
+            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,
+              links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
+          echo "SLACK=${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}" >> $GITHUB_OUTPUT
 
-      - name: Send EVENT JSON (with signature)
+      - name: Send EVENT JSON
         run: |
           curl -sS -X POST "${{ secrets.EVENT_WEBHOOK }}" \
             -H "Content-Type: application/json" \
             -H "x-event-secret: ${{ secrets.EVENT_SECRET }}" \
-            --data '${{ steps.make.outputs.EVENT }}' \
+            --data-binary @event.json \
             --max-time 10 --retry 2 --retry-delay 2
 
       - name: Send Slack one-liner
         run: |
           curl -sS -X POST "${{ secrets.SLACK_WEBHOOK }}" \
             -H "Content-Type: application/json" \
-            --data "{\"text\":${{ steps.make.outputs.SLACK_ESCAPED }}}" \
+            --data "{\"text\":\"${{ steps.make.outputs.SLACK }}\"}" \
             --max-time 10 --retry 2 --retry-delay 2
 
