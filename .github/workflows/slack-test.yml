@@ -1,0 +1,14 @@
+name: Slack Test
+on:
+  workflow_dispatch:  # 수동 실행용
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send test message to Slack
+        run: |
+          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
+            -H 'Content-type: application/json' \
+            --data '{"text":"✅ Slack 연결 테스트 성공! (from GitHub Actions)"}'
+
