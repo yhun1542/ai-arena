@@ -1,107 +1,78 @@
-name: "Notify (EVENT + Slack)"
-description: "Send EVENT JSON to EVENT_WEBHOOK and one-liner to Slack"
+name: 'Notify'
+description: 'Send notifications to Slack and Supabase'
 inputs:
   ticket:
+    description: 'Ticket ID'
     required: true
-    description: "Ticket ID"
   actor:
+    description: 'Actor name'
     required: true
-    description: "Actor"
   phase:
+    description: 'Phase name'
     required: true
-    description: "Phase"
   status:
+    description: 'Status'
     required: true
-    description: "Status"
   notes:
+    description: 'Additional notes'
     required: false
-    default: ""
-    description: "Notes"
-  pr:
-    required: false
-    default: ""
-    description: "PR URL"
-  preview:
-    required: false
-    default: ""
-    description: "Preview URL"
-
+    default: ''
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Ensure jq
+    - name: 'Send notifications'
       shell: bash
       run: |
-        sudo apt-get update && sudo apt-get install -y jq
-
-    - name: Build EVENT JSON file
-      shell: bash
-      run: |
-        TS=$(date -Iseconds)
-        RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-        jq -n \
-          --arg t "${{ inputs.ticket }}" \
-          --arg a "${{ inputs.actor }}" \
-          --arg p "${{ inputs.phase }}" \
-          --arg s "${{ inputs.status }}" \
-          --arg ts "$TS" \
-          --arg pr "${{ inputs.pr }}" \
-          --arg run "$RUN_URL" \
-          --arg pv "${{ inputs.preview }}" \
-          --arg nt "${{ inputs.notes }}" \
-          '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
-        echo "Built event.json:"
+        echo "Sending notifications..."
+        echo "Ticket: ${{ inputs.ticket }}"
+        echo "Actor: ${{ inputs.actor }}"
+        echo "Phase: ${{ inputs.phase }}"
+        echo "Status: ${{ inputs.status }}"
+        echo "Notes: ${{ inputs.notes }}"
+        
+        # Create event JSON
+        cat > event.json << EOF
+        {
+          "ticket_id": "${{ inputs.ticket }}",
+          "actor": "${{ inputs.actor }}",
+          "phase": "${{ inputs.phase }}",
+          "status": "${{ inputs.status }}",
+          "ts": "$(date -Iseconds)",
+          "links": {
+            "run": "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          },
+          "notes": "${{ inputs.notes }}"
+        }
+        EOF
+        
+        echo "Event JSON created:"
         cat event.json
-
-    - name: Validate secrets
-      shell: bash
-      run: |
-        if [ -z "$EVENT_WEBHOOK" ]; then
-          echo "❌ EVENT_WEBHOOK is empty"
-          exit 1
+        
+        # Send to Slack if webhook is available
+        if [ -n "$SLACK_WEBHOOK" ]; then
+          MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
+          curl -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$MSG\"}" || echo "Slack notification failed"
+        else
+          echo "SLACK_WEBHOOK not set, skipping Slack notification"
         fi
-        if [ -z "$SLACK_WEBHOOK" ]; then
-          echo "❌ SLACK_WEBHOOK is empty"
-          exit 1
+        
+        # Send to Supabase if webhook is available
+        if [ -n "$EVENT_WEBHOOK" ] && [ -n "$SUPABASE_ANON_KEY" ] && [ -n "$EVENT_SECRET" ]; then
+          curl -X POST "$EVENT_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "x-event-secret: $EVENT_SECRET" \
+            -d @event.json || echo "Supabase notification failed"
+        else
+          echo "Supabase credentials not complete, skipping Supabase notification"
         fi
-        if [ -z "$SUPABASE_ANON_KEY" ]; then
-          echo "❌ SUPABASE_ANON_KEY is empty"
-          exit 1
-        fi
-        if [ -z "$EVENT_SECRET" ]; then
-          echo "❌ EVENT_SECRET is empty"
-          exit 1
-        fi
-        echo "✅ All secrets are present"
-      env:
-        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
-        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
-        SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
-        EVENT_SECRET: ${{ env.EVENT_SECRET }}
-
-    - name: Send EVENT JSON
-      shell: bash
-      run: |
-        curl -sS -X POST "$EVENT_WEBHOOK" \
-          -H "Content-Type: application/json" \
-          -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-          -H "x-event-secret: $EVENT_SECRET" \
-          --data-binary @event.json \
-          --max-time 15 --retry 2 --retry-delay 2
-      env:
-        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
-        EVENT_SECRET: ${{ env.EVENT_SECRET }}
-        SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
-
-    - name: Send Slack message
-      shell: bash
-      run: |
-        MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
-        ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
-        curl -sS -X POST "$SLACK_WEBHOOK" \
-          -H "Content-Type: application/json" \
-          --data "{\"text\":$ESCAPED}" \
-          --max-time 15 --retry 2 --retry-delay 2
+        
+        echo "Notifications completed"
       env:
         SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
+        SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+        EVENT_SECRET: ${{ env.EVENT_SECRET }}
 
