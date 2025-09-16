@@ -1,0 +1,61 @@
+name: "Notify (EVENT + Slack)"
+description: "Send EVENT JSON to EVENT_WEBHOOK and one-liner to Slack"
+inputs:
+  ticket:  { required: true,  description: "Ticket ID" }
+  actor:   { required: true,  description: "Actor" }
+  phase:   { required: true,  description: "Phase" }
+  status:  { required: true,  description: "Status" }
+  notes:   { required: false, default: "" }
+  pr:      { required: false, default: "" }
+  preview: { required: false, default: "" }
+
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure jq
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y jq
+
+    - name: Build EVENT JSON file
+      shell: bash
+      run: |
+        TS=$(date -Iseconds)
+        RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        jq -n \
+          --arg t "${{ inputs.ticket }}" \
+          --arg a "${{ inputs.actor }}" \
+          --arg p "${{ inputs.phase }}" \
+          --arg s "${{ inputs.status }}" \
+          --arg ts "$TS" \
+          --arg pr "${{ inputs.pr }}" \
+          --arg run "$RUN_URL" \
+          --arg pv "${{ inputs.preview }}" \
+          --arg nt "${{ inputs.notes }}" \
+          '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,
+            links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' > event.json
+
+    - name: Send EVENT JSON (signed)
+      shell: bash
+      env:
+        EVENT_WEBHOOK: ${{ env.EVENT_WEBHOOK }}
+        EVENT_SECRET:  ${{ env.EVENT_SECRET }}
+      run: |
+        curl -sS -X POST "$EVENT_WEBHOOK" \
+          -H "Content-Type: application/json" \
+          -H "x-event-secret: $EVENT_SECRET" \
+          --data-binary @event.json \
+          --max-time 10 --retry 2 --retry-delay 2
+
+    - name: Send Slack one-liner
+      shell: bash
+      env:
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+      run: |
+        MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
+        # 안전한 이스케이프
+        ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
+        curl -sS -X POST "$SLACK_WEBHOOK" \
+          -H "Content-Type: application/json" \
+          --data "{\"text\":$ESCAPED}" \
+          --max-time 10 --retry 2 --retry-delay 2
+

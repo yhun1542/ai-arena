@@ -17,15 +17,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  notify:
-    needs: pulse
-    if: always()
-    uses: ./.github/workflows/_notify.yml
-    secrets: inherit
-    with:
-      ticket:  "T-001"
-      actor:   "Manus"
-      phase:   "Ops"
-      status:  "updated"
-      notes:   "Pulse | open PRs: ${{ needs.pulse.outputs.PR_COUNT || '?' }}, latest run"
+      - name: Notify (Status Pulse)
+        if: always()
+        uses: ./.github/actions/notify
+        with:
+          ticket:  "T-001"
+          actor:   "Manus"
+          phase:   "Ops"
+          status:  "updated"
+          notes:   "Pulse | open PRs: ${{ steps.sum.outputs.PR_COUNT || '?' }}, latest run"
+        env:
+          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
+          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
