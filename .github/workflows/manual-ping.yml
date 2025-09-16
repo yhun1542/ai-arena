@@ -1,16 +1,22 @@
 name: Manual Ping
-on: { workflow_dispatch: {} }
+on:
+  workflow_dispatch:
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/workflows/_notify.yml
-        secrets: inherit
+      - name: Notify
+        uses: ./.github/actions/notify
         with:
           ticket: "T-000"
           actor: "ChatGPT"
           phase: "Ops"
           status: "updated"
           notes: "Manual sync ping"
+        env:
+          EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
+          EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 

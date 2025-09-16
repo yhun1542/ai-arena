@@ -137,3 +137,58 @@ jobs:
 
 이 시스템으로 모든 워크플로우에서 일관된 알림 형식과 이중 채널 전송이 보장됩니다.
 
+
+## 컴포지트 액션 (Composite Action)
+
+### 구조 변경
+- **기존**: 재사용 가능한 워크플로우 (`.github/workflows/_notify.yml`)
+- **신규**: 컴포지트 액션 (`.github/actions/notify/action.yml`)
+
+### 컴포지트 액션의 장점
+- ✅ **단순한 사용법**: `uses: ./.github/actions/notify` 한 줄로 사용
+- ✅ **시크릿 처리**: `env:`로 직접 주입, `secrets: inherit` 불필요
+- ✅ **에러 방지**: "Unexpected value 'secrets'" 같은 오류 해결
+- ✅ **성능 향상**: 별도 job 생성 없이 같은 job 내에서 실행
+
+### 사용 방법
+```yaml
+- name: Notify
+  uses: ./.github/actions/notify
+  with:
+    ticket: "T-001"
+    actor: "Manus"
+    phase: "Dev"
+    status: "${{ job.status }}"
+    notes: "CI passed"
+  env:
+    EVENT_WEBHOOK: ${{ secrets.EVENT_WEBHOOK }}
+    EVENT_SECRET:  ${{ secrets.EVENT_SECRET }}
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+### 시크릿 주입 방식
+- **컴포지트 액션**: `env:`로 시크릿 주입 (권장)
+- **재사용 워크플로우**: `secrets: inherit` 사용 (구형)
+
+### 파일 구조
+```
+.github/
+├── actions/
+│   └── notify/
+│       └── action.yml          # 컴포지트 액션
+└── workflows/
+    ├── ci.yml                  # 컴포지트 액션 사용
+    ├── deploy.yml              # 컴포지트 액션 사용
+    ├── status-pulse.yml        # 컴포지트 액션 사용
+    ├── manual-ping.yml         # 테스트용
+    └── _notify.yml             # 구형 (제거 예정)
+```
+
+### 마이그레이션 완료
+- ✅ **CI 워크플로우**: 컴포지트 액션으로 전환
+- ✅ **Deploy 워크플로우**: 컴포지트 액션으로 전환  
+- ✅ **Status Pulse**: 컴포지트 액션으로 전환
+- ✅ **Manual Ping**: 컴포지트 액션으로 전환
+
+이제 모든 워크플로우에서 더 간단하고 안정적인 알림 시스템을 사용할 수 있습니다.
+
