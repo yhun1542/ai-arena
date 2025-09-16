@@ -11,8 +11,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm ci
-      - run: npm run test:ci
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test:ci
       - name: Notify PM (Dev started)
         if: github.ref == 'refs/heads/feature/T-001-homepage'
         run: |
