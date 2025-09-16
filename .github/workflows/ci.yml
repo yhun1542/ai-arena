@@ -15,11 +15,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build --if-present
 
-      # Slack 전파 (성공/실패 모두)
-      - name: Notify Slack (CI result)
-        if: always()
-        run: |
-          STATUS="${{ job.status }}"
-          MSG="Manus ▶ T-001 Dev ${STATUS} | run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" -H 'Content-type: application/json' --data "{\"text\":\"${MSG}\"}"
+  notify:
+    needs: build-test
+    if: always()
+    uses: ./.github/workflows/_notify.yml
+    secrets: inherit
+    with:
+      ticket:  "T-001"
+      actor:   "Manus"
+      phase:   "Dev"
+      status:  "${{ needs.build-test.result }}"
+      notes:   "CI ${{ needs.build-test.result }}"
 

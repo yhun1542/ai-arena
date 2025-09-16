@@ -17,10 +17,17 @@ jobs:
         run: |
           npm i -g vercel@latest
           vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
-      - name: Notify Slack (Deploy result)
-        if: always()
-        run: |
-          STATUS="${{ job.status }}"
-          MSG="Manus ▶ T-001 Deploy ${STATUS} | preview: https://ai-arena.vercel.app"
-          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" -H 'Content-type: application/json' --data "{\"text\":\"${MSG}\"}"
+
+  notify:
+    needs: vercel
+    if: always()
+    uses: ./.github/workflows/_notify.yml
+    secrets: inherit
+    with:
+      ticket:  "T-001"
+      actor:   "Manus"
+      phase:   "Deploy"
+      status:  "${{ needs.vercel.result }}"
+      notes:   "Vercel ${{ needs.vercel.result }}"
+      preview: "https://ai-arena.vercel.app"
 

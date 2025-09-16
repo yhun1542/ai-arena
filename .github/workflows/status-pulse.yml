@@ -12,14 +12,20 @@ jobs:
       - name: Summarize open PRs and recent runs
         id: sum
         run: |
-          echo "REPORT=$(printf 'Manus ▶ T-001 Pulse | open PRs: %s, latest run: %s' \
-            "$(gh pr list --json number --jq 'length' || echo '?')" \
-            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions" )" >> $GITHUB_OUTPUT
+          PR_COUNT=$(gh pr list --json number --jq 'length' || echo '?')
+          echo "PR_COUNT=$PR_COUNT" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Notify Slack (Pulse)
-        run: |
-          curl -X POST "${{ secrets.SLACK_WEBHOOK }}" \
-          -H 'Content-type: application/json' \
-          --data "{\"text\":\"${{ steps.sum.outputs.REPORT }}\"}"
+
+  notify:
+    needs: pulse
+    if: always()
+    uses: ./.github/workflows/_notify.yml
+    secrets: inherit
+    with:
+      ticket:  "T-001"
+      actor:   "Manus"
+      phase:   "Ops"
+      status:  "updated"
+      notes:   "Pulse | open PRs: ${{ needs.pulse.outputs.PR_COUNT || '?' }}, latest run"
 
