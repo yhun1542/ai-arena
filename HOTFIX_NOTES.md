@@ -75,3 +75,45 @@ echo "SLACK_ESCAPED=$ESCAPED" >> $GITHUB_ENV
 
 이제 JSON 처리 문제가 완전히 해결되었습니다! 🎉
 
+
+## 🔄 재사용 워크플로우 올바른 사용법
+
+### **문제점**
+- **잘못된 방식**: `steps` 레벨에서 `uses: ./.github/workflows/_notify.yml` 호출
+- **에러**: "Unexpected value 'secrets'" 또는 호출 실패
+
+### **올바른 방식**
+```yaml
+jobs:
+  notify:
+    # ✅ jobs 레벨에서 uses 사용
+    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Dev"
+      status: "passed"
+      notes: "CI passed"
+    # ✅ secrets는 job 레벨에서만 사용 가능
+    secrets: inherit
+```
+
+### **핵심 규칙**
+1. **Job 레벨 호출**: `jobs.<id>.uses`에서 재사용 워크플로우 호출
+2. **절대 경로**: `<OWNER>/<REPO>/.github/workflows/_notify.yml@<BRANCH>` 형식
+3. **브랜치 지정**: `@main` 또는 해당 브랜치명
+4. **시크릿 상속**: `secrets: inherit`로 모든 시크릿 전달
+
+### **수정된 워크플로우**
+- ✅ **manual-ping.yml**: Job 레벨 호출로 수정
+- ✅ **ci.yml**: 별도 notify job으로 분리
+- ✅ **deploy.yml**: 별도 notify job으로 분리
+- ✅ **status-pulse.yml**: Job 간 outputs 전달로 수정
+
+### **장점**
+- **안정성**: GitHub Actions의 표준 방식 준수
+- **호환성**: 모든 GitHub 기능과 완벽 호환
+- **확장성**: 다른 저장소에서도 재사용 가능
+
+이제 재사용 워크플로우가 올바른 방식으로 작동합니다! 🎯
+
