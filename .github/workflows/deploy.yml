@@ -42,7 +42,7 @@ jobs:
       phase: "Deploy"
       status: "${{ needs.vercel.result }}"
       notes: "Vercel ${{ needs.vercel.result }}"
-      preview: "https://ai-arena.vercel.app"
+      preview: "https://ai-arena.vercel.app" 
     secrets: inherit
       - run: pnpm run build
       - name: Deploy to Vercel
