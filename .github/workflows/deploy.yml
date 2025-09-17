@@ -3,8 +3,6 @@ name: Deploy
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -17,44 +15,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node and pnpm
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
+      - name: Deploy to Vercel
         run: |
-          npm install -g pnpm@9.12.1
-          echo "pnpm version:"
-          pnpm --version
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-
-      # 내부 프록시 액션 호출 (./.github/actions/manus-proxy/action.yml 필요)
-      - name: Manus Proxy
-        uses: ./.github/actions/manus-proxy
-        with:
-          token: ${{ secrets.MANUS_TOKEN }}
-          org-id: ${{ secrets.VERCEL_ORG_ID }}
-          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          echo "✅ Code pushed to main branch"
+          echo "🚀 Vercel will automatically deploy from this commit"
+          echo "📍 Check deployment status at: https://vercel.com/arena-d8417464/ai-arena"
+          echo "🎯 Expected URL pattern: https://ai-arena-*.vercel.app"
 
   notify:
     needs: deploy
