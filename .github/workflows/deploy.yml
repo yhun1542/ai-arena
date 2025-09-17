@@ -32,14 +32,9 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Manus AI step is gated by repo variable to avoid policy violations.
-      - name: Manus AI (gated by policy)
-        if: ${{ vars.ALLOW_MANUS == 'true' }}
-        uses: manus-ai/action@v1
-        with:
-          token: ${{ secrets.MANUS_TOKEN }}
-          org-id: ${{ secrets.VERCEL_ORG_ID }}
-          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+      # Manus AI step removed due to org policy allowlist pre-validation.
+      - name: Manus placeholder
+        run: echo "Manus step skipped due to Actions policy (allowlist)."
 
   notify:
     needs: deploy
