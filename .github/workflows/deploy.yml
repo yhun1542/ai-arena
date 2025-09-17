@@ -24,7 +24,7 @@ jobs:
 
       - name: Install pnpm
         run: |
-          npm install -g pnpm@9.14.4
+          npm install -g pnpm@9.12.1
           echo "pnpm version:"
           pnpm --version
 
