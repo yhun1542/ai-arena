@@ -24,8 +24,8 @@ jobs:
 
       - name: Install pnpm
         run: |
-          corepack enable
-          corepack prepare pnpm@9.14.4 --activate
+          npm install -g pnpm@9.14.4
+          echo "pnpm version:"
           pnpm --version
 
       - name: Install dependencies
