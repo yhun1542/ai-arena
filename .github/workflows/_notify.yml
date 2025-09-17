@@ -1,16 +1,44 @@
 name: Notify
+
 on:
   workflow_call:
     inputs:
-      job_name:   { required: false, type: string, default: "" }
-      job_status: { required: false, type: string, default: "" }
-      ticket:     { required: false, type: string, default: "" }
-      actor:      { required: false, type: string, default: "" }
-      phase:      { required: false, type: string, default: "" }
-      status:     { required: false, type: string, default: "" }
-      notes:      { required: false, type: string, default: "" }
-      pr:         { required: false, type: string, default: "" }
-      preview:    { required: false, type: string, default: "" }
+      job_name:
+        required: false
+        type: string
+        default: ""
+      job_status:
+        required: false
+        type: string
+        default: ""
+      ticket:
+        required: false
+        type: string
+        default: ""
+      actor:
+        required: false
+        type: string
+        default: ""
+      phase:
+        required: false
+        type: string
+        default: ""
+      status:
+        required: false
+        type: string
+        default: ""
+      notes:
+        required: false
+        type: string
+        default: ""
+      pr:
+        required: false
+        type: string
+        default: ""
+      preview:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   notify:
@@ -22,9 +50,9 @@ jobs:
         run: |
           set -euo pipefail
           ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          cat > event.json <<JSON
+          cat > event.json <<'JSON'
           {
-            "timestamp": "${ts}",
+            "timestamp": "__TS__",
             "repository": "${{ github.repository }}",
             "workflow": "${{ github.workflow }}",
             "run_id": "${{ github.run_id }}",
@@ -46,6 +74,7 @@ jobs:
             "ticket": "${{ inputs.ticket }}"
           }
           JSON
+          sed -i "s/__TS__/${ts}/" event.json
 
       - name: Send to Supabase (if secrets exist)
         shell: bash
@@ -56,7 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_ROLE:-}" ] && [ -n "${EVENT_SECRET:-}" ]; then
-            curl -sS -X POST "$SUPABASE_URL/rest/v1/arena_events"               -H "apikey: $SUPABASE_SERVICE_ROLE"               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE"               -H "Content-Type: application/json"               -H "X-Event-Secret: $EVENT_SECRET"               --data-binary @event.json               --max-time 15 --retry 2 --retry-delay 2
+            curl -sS -f -X POST "$SUPABASE_URL/rest/v1/arena_events"               -H "apikey: $SUPABASE_SERVICE_ROLE"               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE"               -H "Content-Type: application/json"               -H "X-Event-Secret: $EVENT_SECRET"               --data-binary @event.json               --max-time 15 --retry 2 --retry-delay 2
           else
             echo "Supabase secrets not set; skipping."
           fi
@@ -68,13 +97,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${SLACK_WEBHOOK:-}" ]; then
-            text="[$GITHUB_REPOSITORY] ${{ inputs.job_name || 'job' }} -> ${{ inputs.job_status || 'unknown' }} (#${{ github.run_number }})"
-            payload=$(python - <<'PY'
-import json,os
-print(json.dumps({"text": os.environ["TEXT"]}))
-PY
-            )
-            curl -sS -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" --data "$payload" --max-time 10 --retry 2 --retry-delay 2
+            text="[${GITHUB_REPOSITORY}] ${{ inputs.job_name || 'job' }} -> ${{ inputs.job_status || 'unknown' }} (#${{ github.run_number }})"
+            payload="$(jq -n --arg t "$text" '{text:$t}')"
+            curl -sS -f -X POST "$SLACK_WEBHOOK"               -H "Content-Type: application/json"               --data "$payload"               --max-time 10 --retry 2 --retry-delay 2
           else
             echo "Slack webhook not set; skipping."
           fi
