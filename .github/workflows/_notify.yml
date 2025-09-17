@@ -2,57 +2,79 @@ name: Notify
 on:
   workflow_call:
     inputs:
-      ticket:   { required: true, type: string }
-      actor:    { required: true, type: string }
-      phase:    { required: true, type: string }
-      status:   { required: true, type: string }
-      notes:    { required: false, type: string, default: "" }
-      pr:       { required: false, type: string, default: "" }
-      preview:  { required: false, type: string, default: "" }
+      job_name:   { required: false, type: string, default: "" }
+      job_status: { required: false, type: string, default: "" }
+      ticket:     { required: false, type: string, default: "" }
+      actor:      { required: false, type: string, default: "" }
+      phase:      { required: false, type: string, default: "" }
+      status:     { required: false, type: string, default: "" }
+      notes:      { required: false, type: string, default: "" }
+      pr:         { required: false, type: string, default: "" }
+      preview:    { required: false, type: string, default: "" }
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Ensure jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Build payloads
+      - name: Build event payload
+        id: make_payload
+        shell: bash
         run: |
-          TS=$(date -Iseconds)
-          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          set -euo pipefail
+          ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          cat > event.json <<JSON
+          {
+            "timestamp": "${ts}",
+            "repository": "${{ github.repository }}",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "run_number": "${{ github.run_number }}",
+            "ref": "${{ github.ref }}",
+            "sha": "${{ github.sha }}",
+            "actor": "${{ inputs.actor || github.actor }}",
+            "job": {
+              "name": "${{ inputs.job_name }}",
+              "status": "${{ inputs.job_status }}",
+              "phase": "${{ inputs.phase }}"
+            },
+            "deploy": {
+              "status": "${{ inputs.status }}",
+              "notes": "${{ inputs.notes }}",
+              "preview": "${{ inputs.preview }}",
+              "pr": "${{ inputs.pr }}"
+            },
+            "ticket": "${{ inputs.ticket }}"
+          }
+          JSON
 
-          # ① EVENT JSON → 파일 저장 (output 사용 안 함)
-          jq -n \
-            --arg t "${{ inputs.ticket }}" \
-            --arg a "${{ inputs.actor }}" \
-            --arg p "${{ inputs.phase }}" \
-            --arg s "${{ inputs.status }}" \
-            --arg ts "$TS" \
-            --arg pr "${{ inputs.pr }}" \
-            --arg run "$RUN_URL" \
-            --arg pv "${{ inputs.preview }}" \
-            --arg nt "${{ inputs.notes }}" \
-            '{ticket_id:$t,actor:$a,phase:$p,status:$s,ts:$ts,links:{pr:$pr,run:$run,preview:$pv},notes:$nt}' \
-            > event.json
-
-          # ② Slack 원라이너는 안전 이스케이프해서 GITHUB_ENV 로 전달
-          MSG="${{ inputs.actor }} ▶ ${{ inputs.ticket }} ${{ inputs.phase }} ${{ inputs.status }} | ${{ inputs.notes }}"
-          ESCAPED=$(printf '%s' "$MSG" | jq -Rsa .)
-          echo "SLACK_ESCAPED=$ESCAPED" >> $GITHUB_ENV
-
-      - name: Send EVENT JSON
+      - name: Send to Supabase (if secrets exist)
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+          EVENT_SECRET: ${{ secrets.EVENT_SECRET }}
         run: |
-          curl -sS -X POST "${{ secrets.EVENT_WEBHOOK }}" \
-            -H "Content-Type: application/json" \
-            -H "x-event-secret: ${{ secrets.EVENT_SECRET }}" \
-            --data-binary @event.json \
-            --max-time 10 --retry 2 --retry-delay 2
+          set -euo pipefail
+          if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_ROLE:-}" ] && [ -n "${EVENT_SECRET:-}" ]; then
+            curl -sS -X POST "$SUPABASE_URL/rest/v1/arena_events"               -H "apikey: $SUPABASE_SERVICE_ROLE"               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE"               -H "Content-Type: application/json"               -H "X-Event-Secret: $EVENT_SECRET"               --data-binary @event.json               --max-time 15 --retry 2 --retry-delay 2
+          else
+            echo "Supabase secrets not set; skipping."
+          fi
 
-      - name: Send Slack one-liner
+      - name: Send Slack one-liner (if webhook set)
+        shell: bash
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
-          curl -sS -X POST "${{ secrets.SLACK_WEBHOOK }}" \
-            -H "Content-Type: application/json" \
-            --data "{\"text\":${SLACK_ESCAPED}}" \
-            --max-time 10 --retry 2 --retry-delay 2
-
+          set -euo pipefail
+          if [ -n "${SLACK_WEBHOOK:-}" ]; then
+            text="[$GITHUB_REPOSITORY] ${{ inputs.job_name || 'job' }} -> ${{ inputs.job_status || 'unknown' }} (#${{ github.run_number }})"
+            payload=$(python - <<'PY'
+import json,os
+print(json.dumps({"text": os.environ["TEXT"]}))
+PY
+            )
+            curl -sS -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" --data "$payload" --max-time 10 --retry 2 --retry-delay 2
+          else
+            echo "Slack webhook not set; skipping."
+          fi
