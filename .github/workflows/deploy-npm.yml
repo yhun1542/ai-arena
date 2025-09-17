@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # 내부 프록시 액션 호출 (./.github/actions/manus-proxy/action.yml 필요)
+      - name: Manus Proxy
+        uses: ./.github/actions/manus-proxy
+        with:
+          token: ${{ secrets.MANUS_TOKEN }}
+          org-id: ${{ secrets.VERCEL_ORG_ID }}
+          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  notify:
+    needs: deploy
+    if: always()
+    uses: ./.github/workflows/_notify.yml
+    with:
+      job_name: deploy
+      job_status: ${{ needs.deploy.result }}
+    secrets: inherit
