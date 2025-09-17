@@ -32,9 +32,13 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Manus AI step removed due to org policy allowlist pre-validation.
-      - name: Manus placeholder
-        run: echo "Manus step skipped due to Actions policy (allowlist)."
+      # 내부 프록시 액션 호출 (./.github/actions/manus-proxy/action.yml 필요)
+      - name: Manus Proxy
+        uses: ./.github/actions/manus-proxy
+        with:
+          token: ${{ secrets.MANUS_TOKEN }}
+          org-id: ${{ secrets.VERCEL_ORG_ID }}
+          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
 
   notify:
     needs: deploy
