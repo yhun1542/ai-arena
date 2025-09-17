@@ -11,7 +11,39 @@ jobs:
         with: { node-version: 20 }
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
+name: Deploy
+on:
+  push: { branches: [ main ] }
+
+jobs:
+  vercel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: 
+          node-version: 20
+          cache: 'pnpm'
+      - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: Deploy to Vercel
+        run: |
+          npm i -g vercel@latest
+          vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
+
+  notify:
+    needs: vercel
+    if: always()
+    uses: yhun1542/ai-arena/.github/workflows/_notify.yml@main
+    with:
+      ticket: "T-001"
+      actor: "Manus"
+      phase: "Deploy"
+      status: "${{ needs.vercel.result }}"
+      notes: "Vercel ${{ needs.vercel.result }}"
+      preview: "https://ai-arena.vercel.app"
+    secrets: inherit
       - run: pnpm run build
       - name: Deploy to Vercel
         run: |
