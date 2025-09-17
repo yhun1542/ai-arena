@@ -1,0 +1,25 @@
+name: "Manus Proxy"
+description: "Proxy action to call Manus AI API from inside repo"
+
+inputs:
+  token:
+    description: "Manus API Token"
+    required: true
+  org-id:
+    description: "Vercel Org ID"
+    required: true
+  project-id:
+    description: "Vercel Project ID"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Call Manus API
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl -sS -X POST "https://api.manus.ai/deploy" \
+          -H "Authorization: Bearer ${{ inputs.token }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"orgId\":\"${{ inputs.org-id }}\",\"projectId\":\"${{ inputs.project-id }}\"}"
