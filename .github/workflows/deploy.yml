@@ -16,8 +16,8 @@ jobs:
 
       - name: 2. Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+       
+          
 
       - name: 3. Setup Node.js
         uses: actions/setup-node@v4
@@ -39,3 +39,4 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           # main 브랜치면 프로덕션, 아니면 프리뷰
           prod: ${{ github.ref == 'refs/heads/main' }}
+
