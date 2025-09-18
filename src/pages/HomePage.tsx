@@ -37,37 +37,34 @@ export default function HomePage() {
         <meta name="description" content="4개의 최고 AI가 협력하여 당신의 질문에 대한 최적의 답변을 제공합니다. 토론이 아닌 결과로 증명하는 차세대 AI 서비스." />
       </Helmet>
 
-      <main className="min-h-screen flex flex-col items-center justify-center px-6">
-        <div className="w-full flex flex-col items-center">
+      <main className="container">
+        <div className="content-wrapper">
           
           {/* Synapse 로고 - 뇌 아이콘을 오른쪽 위로 */}
-          <div className="text-center mb-16">
-            <div className="relative inline-block">
-              <h1 className="font-bold gradient-text" style={{ fontSize: '12rem', lineHeight: '1' }}>Synapse</h1>
-              <img 
-                src="/brain-icon.svg" 
-                alt="Brain Icon" 
-                className="absolute -top-4 -right-8 w-32 h-32 text-synapse-primary"
-                style={{ filter: 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(87deg) brightness(119%) contrast(119%)' }}
-              />
-            </div>
+          <div className="title-container">
+            <h1 className="title">Synapse</h1>
+            <img 
+              src="/brain-icon.svg" 
+              alt="Brain Icon" 
+              className="brain-icon"
+            />
           </div>
 
-          {/* 검색 폼 - 세로는 넉넉하게, 가로는 적당히 */}
-          <form onSubmit={handleSubmit} className="mb-8 w-full max-w-3xl px-12">
-            <div className="relative">
+          {/* 검색 폼 - 개선된 구조 */}
+          <form onSubmit={handleSubmit} className="form">
+            <div className="search-box">
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
-                className="synapse-input-enhanced text-3xl py-8 px-8 pr-20 w-full text-center"
+                className="search-input"
                 disabled={isAnalyzing}
               />
               <button
                 type="submit"
                 disabled={!query.trim() || isAnalyzing}
-                className="synapse-search-button disabled:opacity-50 disabled:cursor-not-allowed"
+                className="search-button"
               >
                 {isAnalyzing ? (
                   <Sparkles className="w-6 h-6 animate-spin" />
