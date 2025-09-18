@@ -1,98 +1,75 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+// api/search.ts
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  // 상관관계ID 생성 (crypto.randomUUID 사용)
-  const reqId = crypto.randomUUID();
-  
-  // 기본 헤더 설정
-  res.setHeader('x-request-id', reqId);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store');
+// 1. Vercel의 타입을 명확하게 import 합니다.
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+// 2. uuid를 ES Module 방식으로 안전하게 import 합니다.
+import { v4 as uuidv4 } from 'uuid';
+
+export default function handler(
+  request: VercelRequest,
+  response: VercelResponse,
+) {
+  // 상관관계ID 추가
+  const requestId = uuidv4();
+  response.setHeader('x-request-id', requestId);
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // OPTIONS 요청 처리 (CORS preflight)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (request.method === 'OPTIONS') {
+    return response.status(200).end();
   }
 
-  // POST 메서드만 허용
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ 
-      error: 'Method not allowed',
-      message: 'Only POST method is supported' 
-    });
+  if (request.method !== 'POST') {
+    response.setHeader('Allow', 'POST');
+    return response.status(405).end();
   }
 
-  // Content-Type 검증
-  const contentType = req.headers['content-type'];
-  if (!contentType?.includes('application/json')) {
-    return res.status(400).json({ 
-      error: 'Invalid content type',
-      message: 'Content-Type must be application/json' 
-    });
+  const contentType = request.headers['content-type'] || '';
+  if (!contentType.includes('application/json')) {
+    return response.status(400).json({ error: 'Content-Type must be application/json' });
   }
 
   try {
-    // 요청 본문 검증
-    const { query } = req.body;
-    
-    if (!query || typeof query !== 'string' || !query.trim()) {
-      return res.status(400).json({ 
-        error: 'Invalid input',
-        message: 'Query is required and must be a non-empty string' 
-      });
+    const { query } = request.body ?? {};
+    const q = (query ?? '').trim();
+
+    if (!q || typeof q !== 'string' || q.length > 20000) {
+      return response.status(400).json({ error: 'Invalid query provided' });
     }
 
-    if (query.length > 20000) {
-      return res.status(400).json({ 
-        error: 'Query too long',
-        message: 'Query cannot exceed 20,000 characters' 
-      });
-    }
-
-    // 토론 ID 생성 (crypto.randomUUID 사용)
-    const discussionId = crypto.randomUUID();
-
-    // 성공 응답 - 201 Created + Location 헤더
-    res.setHeader('Location', `/discussion?id=${discussionId}`);
+    const id = uuidv4();
     
-    // 로깅
+    // 로깅 (민감정보 제외)
     console.log(JSON.stringify({
       ts: new Date().toISOString(),
       level: 'info',
       event: 'DISCUSSION_CREATED',
-      reqId,
+      reqId: requestId,
       route: '/api/search',
       method: 'POST',
       status: 201,
-      discussionId,
-      queryLength: query.length
+      queryLength: q.length,
+      discussionId: id
     }));
 
-    return res.status(201).json({ 
-      discussionId,
-      status: 'created',
-      message: 'Discussion created successfully' 
-    });
-
-  } catch (error) {
+    response.setHeader('Location', `/discussion?id=${encodeURIComponent(id)}`);
+    return response.status(201).json({ discussionId: id, status: 'created' });
+    
+  } catch (e: any) {
     // 오류 로깅
     console.error(JSON.stringify({
       ts: new Date().toISOString(),
       level: 'error',
       event: 'DISCUSSION_CREATE_FAILED',
-      reqId,
+      reqId: requestId,
       route: '/api/search',
       method: 'POST',
-      status: 500,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      status: 400,
+      error: e?.message || 'Invalid JSON'
     }));
-
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Failed to create discussion' 
-    });
+    
+    return response.status(400).json({ error: 'Invalid JSON in request body' });
   }
 }
