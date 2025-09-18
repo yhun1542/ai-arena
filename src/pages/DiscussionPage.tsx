@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Bot, Sparkles, Frown, ThumbsUp, Home, RefreshCw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Bot, Home, RefreshCw, Frown } from 'lucide-react';
+import { motion } from 'framer-motion';
 import LanguageSelector from '../components/LanguageSelector';
 
 export default function DiscussionPage() {
@@ -14,20 +13,22 @@ export default function DiscussionPage() {
   const [searchParams] = useSearchParams();
   const userQuery = searchParams.get('q');
   const discussionId = searchParams.get('id');
-
+  
   const [streamedContent, setStreamedContent] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const hasStarted = useRef(false);
 
   const handleStream = useCallback(async () => {
+    if (isStreaming) return;
+
+    setIsStreaming(true);
     setStatusMessage('🔄 연결 설정 중...');
     setStreamedContent(''); // 이전 내용 초기화
-    setIsLoading(true);
     setError('');
 
     try {
+      // 모든 리소스 요청은 상대 경로를 사용합니다.
       const response = await fetch(`/api/stream?q=${encodeURIComponent(userQuery || '')}`);
       
       if (!response.ok) {
@@ -48,9 +49,8 @@ export default function DiscussionPage() {
           setStatusMessage('🎉 스트리밍이 성공적으로 완료되었습니다!');
           break;
         }
-        
-        // 텍스트 조각을 상태에 추가하여 화면에 실시간으로 렌더링
-        const chunk = decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value);
+        // useState를 사용하여 화면을 안정적으로 업데이트합니다.
         setStreamedContent((prev) => prev + chunk);
       }
     } catch (error) {
@@ -58,19 +58,18 @@ export default function DiscussionPage() {
       setError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
       setStatusMessage('🚨 스트리밍 중 오류가 발생했습니다.');
     } finally {
-      setIsLoading(false);
+      setIsStreaming(false);
     }
   }, [userQuery]);
 
   // 페이지 로드 시 자동으로 스트리밍 시작
   useEffect(() => {
-    if (!userQuery || !discussionId || hasStarted.current) return;
-    hasStarted.current = true;
-    handleStream();
+    if (userQuery && discussionId) {
+      handleStream();
+    }
   }, [userQuery, discussionId, handleStream]);
 
   const handleRetry = () => {
-    hasStarted.current = false;
     handleStream();
   };
 
@@ -81,8 +80,9 @@ export default function DiscussionPage() {
   return (
     <>
       <Helmet>
-        <title>{t('discussionTitle')} - {t('pageTitle')}</title>
+        <title>토론 진행 중 | {t('pageTitle')}</title>
         <meta name="description" content={`${userQuery}에 대한 AI 팀의 응답`} />
+        <meta name="robots" content="noindex" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 lg:p-8 font-sans">
@@ -99,7 +99,7 @@ export default function DiscussionPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              AI ARENA
+              AI Arena Discussion
             </motion.h1>
             <motion.p 
               className="text-lg text-gray-400 mt-2"
@@ -109,10 +109,10 @@ export default function DiscussionPage() {
             >
               "{userQuery}"
             </motion.p>
+            <p className="text-sm text-gray-500 mt-1">ID: {discussionId}</p>
           </header>
 
           <main className="space-y-6">
-            {/* 상태 메시지 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -129,7 +129,7 @@ export default function DiscussionPage() {
                   <div className="space-y-4">
                     {/* 상태 표시 */}
                     <div className="flex items-center space-x-2">
-                      {isLoading && <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />}
+                      {isStreaming && <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />}
                       <span className="text-sm text-gray-300">{statusMessage}</span>
                     </div>
 
@@ -151,6 +151,14 @@ export default function DiscussionPage() {
                         </pre>
                       </div>
                     )}
+
+                    {/* 빈 상태일 때 안내 메시지 */}
+                    {!streamedContent && !isStreaming && !error && (
+                      <div className="text-center py-8 text-gray-400">
+                        <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>AI 팀의 응답을 기다리고 있습니다...</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="flex space-x-2">
@@ -164,11 +172,11 @@ export default function DiscussionPage() {
                   </Button>
                   <Button 
                     onClick={handleRetry} 
-                    disabled={isLoading}
+                    disabled={isStreaming}
                     className="flex items-center space-x-2"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    <span>{t('retry')}</span>
+                    <RefreshCw className={`h-4 w-4 ${isStreaming ? 'animate-spin' : ''}`} />
+                    <span>{isStreaming ? '응답 받는 중...' : '응답 받기'}</span>
                   </Button>
                 </CardFooter>
               </Card>
