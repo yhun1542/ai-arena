@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { generateDynamicFallback } from '../utils/dynamicFallback';
 import { Helmet } from 'react-helmet-async';
 import { 
   Award, 
@@ -139,33 +140,8 @@ export default function SynapseResultPage() {
       } catch (error) {
         console.error('❌ Synapse API 호출 실패:', error);
         
-        // 에러 발생 시 기본 결과 표시
-        const fallbackResult: SynapseResult = {
-        finalAnswer: {
-          summary: [
-            "블록체인 기술의 비즈니스 적용은 **공급망 투명성**, **디지털 자산 관리**, **스마트 계약 자동화** 세 영역에서 가장 높은 ROI를 보입니다.",
-            "성공적인 도입을 위해서는 **기술적 인프라 구축**(6-12개월), **법적 컴플라이언스 확보**(3-6개월), **조직 역량 개발**(12-18개월)의 단계적 접근이 필요합니다.",
-            "초기 투자비용은 중소기업 기준 **5억-20억원** 수준이며, 3년 내 **30-50%의 운영비 절감** 효과를 기대할 수 있습니다."
-          ],
-          evidence: [
-            "McKinsey Global Institute 보고서에 따르면 블록체인 도입 기업의 87%가 운영 효율성 향상을 보고",
-            "Deloitte 2024 조사: 공급망 분야 블록체인 적용 시 평균 23% 비용 절감 달성",
-            "PwC 분석: 스마트 계약 도입으로 계약 처리 시간 65% 단축 및 분쟁 발생률 40% 감소"
-          ],
-          sources: [
-            "McKinsey Global Institute - Blockchain Technology Report 2024",
-            "Deloitte - Supply Chain Blockchain Implementation Study",
-            "PwC - Smart Contract Business Impact Analysis"
-          ],
-          checkList: [
-            "현재 비즈니스 프로세스 중 자동화 가능한 영역 식별",
-            "블록체인 플랫폼 선택 (Ethereum, Hyperledger, Polygon 등)",
-            "파일럿 프로젝트 설계 및 ROI 측정 지표 설정",
-            "법무팀과 규제 준수 방안 검토",
-            "IT 인프라 및 보안 체계 점검",
-            "직원 교육 프로그램 수립"
-          ]
-        },
+        // 질문에 맞는 동적 fallback 결과 생성
+        const fallbackResult: SynapseResult = generateDynamicFallback(query, isComplex);
         teams: [
           {
             name: "GPT-4o",
