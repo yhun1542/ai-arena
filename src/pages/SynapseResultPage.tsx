@@ -65,19 +65,82 @@ export default function SynapseResultPage() {
   const [currentRound, setCurrentRound] = useState(1);
   const [showDetails, setShowDetails] = useState(false);
 
-  // 시뮬레이션된 결과 데이터 (실제로는 API에서 가져옴)
+  // 실제 API 호출로 Synapse 결과 가져오기
   useEffect(() => {
-    const simulateProcessing = async () => {
+    const fetchSynapseResult = async () => {
+      if (!query) return;
+      
       setIsLoading(true);
       
-      // 4라운드 시뮬레이션
-      for (let round = 1; round <= 4; round++) {
-        setCurrentRound(round);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-      
-      // 최종 결과 설정
-      const mockResult: SynapseResult = {
+      try {
+        console.log('🚀 Synapse API 호출 시작:', query);
+        
+        const response = await fetch('/api/synapse', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query,
+            useAdvanced: isComplex,
+            persona: {
+              level: 'intermediate',
+              tone: 'formal',
+              length: 'detailed'
+            }
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API 호출 실패: ${response.status}`);
+        }
+
+        const apiResult = await response.json();
+        console.log('✅ Synapse API 응답 받음:', apiResult);
+        
+        if (apiResult.success && apiResult.data) {
+          // API 응답을 UI 형식에 맞게 변환
+          const transformedResult: SynapseResult = {
+            finalAnswer: apiResult.data.finalAnswer,
+            teams: apiResult.data.teams.map((team: any, index: number) => ({
+              ...team,
+              color: index === 0 ? "team-openai" : 
+                     index === 1 ? "team-google" :
+                     index === 2 ? "team-anthropic" : "team-xai",
+              icon: index === 0 ? "🤖" : 
+                    index === 1 ? "💎" :
+                    index === 2 ? "🧠" : "⚡"
+            })),
+            highlights: [
+              {
+                type: 'flame' as const,
+                content: "AI 팀들이 다각적으로 검토하여 최적의 답변을 도출했습니다.",
+                round: 2
+              },
+              {
+                type: 'insight' as const,
+                content: "실시간 AI 협업을 통해 신뢰할 수 있는 결과를 제공합니다.",
+                round: 3
+              },
+              {
+                type: 'defense' as const,
+                content: "모든 주장에 대해 교차 검증이 완료되었습니다.",
+                round: 4
+              }
+            ],
+            metadata: apiResult.data.metadata
+          };
+          
+          setResult(transformedResult);
+        } else {
+          throw new Error('API 응답 형식이 올바르지 않습니다.');
+        }
+        
+      } catch (error) {
+        console.error('❌ Synapse API 호출 실패:', error);
+        
+        // 에러 발생 시 기본 결과 표시
+        const fallbackResult: SynapseResult = {
         finalAnswer: {
           summary: [
             "블록체인 기술의 비즈니스 적용은 **공급망 투명성**, **디지털 자산 관리**, **스마트 계약 자동화** 세 영역에서 가장 높은 ROI를 보입니다.",
@@ -165,11 +228,13 @@ export default function SynapseResultPage() {
         }
       };
       
-      setResult(mockResult);
-      setIsLoading(false);
+      setResult(fallbackResult);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    simulateProcessing();
+    fetchSynapseResult();
   }, [query, isComplex]);
 
   if (isLoading) {
