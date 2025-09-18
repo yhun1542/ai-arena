@@ -16,16 +16,15 @@ interface SynapseResult {
     color: string;
     icon: string;
   }>;
-  discussionHighlights: Array<{
+  highlights: Array<{
+    type: 'flame' | 'insight' | 'defense';
+    content: string;
     round: number;
-    type: string;
-    title: string;
-    description: string;
   }>;
   metadata: {
     processingTime: string;
     totalRounds: number;
-    complexity: string;
+    complexity: 'standard' | 'advanced';
   };
 }
 
@@ -186,30 +185,27 @@ export function generateDynamicFallback(query: string, isComplex: boolean): Syna
         icon: "⚡"
       }
     ],
-    discussionHighlights: [
+    highlights: [
       {
-        round: 2,
-        type: "결정적 반박",
-        title: "핵심 가정에 대한 도전",
-        description: "초기 제안된 접근법의 한계점을 명확히 지적"
+        type: 'flame',
+        content: "핵심 가정에 대한 도전: 초기 제안된 접근법의 한계점을 명확히 지적",
+        round: 2
       },
       {
-        round: 3,
-        type: "핵심 통찰",
-        title: "새로운 관점 제시",
-        description: `${topic} 분야의 혁신적 해결 방안 도출`
+        type: 'insight',
+        content: `새로운 관점 제시: ${topic} 분야의 혁신적 해결 방안 도출`,
+        round: 3
       },
       {
-        round: 4,
-        type: "논리적 방어",
-        title: "근거 기반 검증",
-        description: "모든 제안에 대한 신뢰할 수 있는 근거 제시"
+        type: 'defense',
+        content: "근거 기반 검증: 모든 제안에 대한 신뢰할 수 있는 근거 제시",
+        round: 4
       }
     ],
     metadata: {
       processingTime: `${(Math.random() * 3 + 5).toFixed(1)}초`,
       totalRounds: 4,
-      complexity: isComplex ? 'advanced' : 'standard'
+      complexity: isComplex ? 'advanced' as const : 'standard' as const
     }
   };
 }
