@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../components/ui/card';
 import { Bot, Home, RefreshCw, Frown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LanguageSelector from '../components/LanguageSelector';
@@ -109,7 +109,7 @@ export default function DiscussionPage() {
             >
               "{userQuery}"
             </motion.p>
-            <p className="text-sm text-gray-500 mt-1">세션: {discussionId.slice(0, 8)}...</p>
+            <p className="text-sm text-gray-500 mt-1">세션: {discussionId?.slice(0, 8)}...</p>
           </header>
 
           <main className="space-y-6">
