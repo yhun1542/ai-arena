@@ -41,17 +41,17 @@ export default function HomePage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-6">
         <div className="w-full flex flex-col items-center">
           
-          {/* Synapse 로고 - 대폭 확대 */}
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-6 mb-4">
-              <Brain className="w-20 h-20 text-synapse-primary" />
-              <h1 className="text-9xl font-bold gradient-text">Synapse</h1>
+          {/* Synapse 로고 - 5배 더 확대 */}
+          <div className="text-center mb-20">
+            <div className="flex items-center justify-center gap-12 mb-8">
+              <Brain className="w-40 h-40 text-synapse-primary" />
+              <h1 className="font-bold gradient-text" style={{ fontSize: '20rem', lineHeight: '1' }}>Synapse</h1>
             </div>
           </div>
 
-          {/* 검색 폼 - 가로 사이즈 대폭 축소 */}
+          {/* 검색 폼 - 2배 확대 */}
           <form onSubmit={handleSubmit} className="mb-8">
-            <div className="relative w-96">
+            <div className="relative w-[48rem]">
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
