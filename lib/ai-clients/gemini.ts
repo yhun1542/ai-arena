@@ -1,7 +1,7 @@
 // Google Gemini API 클라이언트
 // 실제 구현 시 Google AI Studio API 키와 엔드포인트 필요
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export async function callGemini(prompt: string, model: string): Promise<string> {

@@ -1,7 +1,7 @@
 // xAI Grok API 클라이언트
 // 실제 구현 시 xAI API 키와 엔드포인트 필요
 
-const GROK_API_KEY = process.env.GROK_API_KEY;
+const GROK_API_KEY = process.env.XAI_API_KEY;
 const API_URL = 'https://api.x.ai/v1/chat/completions';
 
 export async function callGrok(prompt: string, model: string): Promise<string> {

@@ -1,7 +1,7 @@
 // Anthropic Claude API 클라이언트
 // 실제 구현 시 Anthropic API 키와 엔드포인트 필요
 
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
+const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY;
 const API_URL = 'https://api.anthropic.com/v1/messages';
 
 export async function callClaude(prompt: string, model: string): Promise<string> {
