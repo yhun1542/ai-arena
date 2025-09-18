@@ -34,12 +34,13 @@ function HomePage() {
         body: JSON.stringify({ query: query.trim() }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `HTTP ${response.status}`)
-      }
-
+      // ✅ BUG FIX: .json()을 한 번만 호출하도록 수정
       const data = await response.json()
+
+      if (!response.ok) {
+        // 서버에서 보낸 에러 메시지를 사용
+        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+      }
       
       // Location 헤더에서 URL 추출하거나 discussionId 사용
       const locationHeader = response.headers.get('Location')
