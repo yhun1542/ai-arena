@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { 
-  Brain, 
   Search,
   Sparkles
 } from 'lucide-react';
@@ -45,7 +44,12 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <div className="relative inline-block">
               <h1 className="font-bold gradient-text" style={{ fontSize: '12rem', lineHeight: '1' }}>Synapse</h1>
-              <Brain className="absolute -top-4 -right-8 w-32 h-32 text-synapse-primary" />
+              <img 
+                src="/brain-icon.svg" 
+                alt="Brain Icon" 
+                className="absolute -top-4 -right-8 w-32 h-32 text-synapse-primary"
+                style={{ filter: 'brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(87deg) brightness(119%) contrast(119%)' }}
+              />
             </div>
           </div>
 
