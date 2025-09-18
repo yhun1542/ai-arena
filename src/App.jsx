@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
-import DiscussionPage from './pages/DiscussionPage.jsx'
+import DiscussionPage from './pages/DiscussionPage'
 import './App.css'
 
 function HomePage() {
