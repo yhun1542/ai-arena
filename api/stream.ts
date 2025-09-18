@@ -6,72 +6,141 @@ export const config = {
   runtime: 'edge',
 };
 
-// AI 페르소나 정의
+// AI 페르소나 정의 (마스터 프롬프트 시스템)
 const personas = {
   eva: {
     name: "Dr. Eva (분석가)",
-    prompt: "당신은 데이터와 사실에 기반하여 논리적이고 비판적인 분석을 제공하는 AI 분석가 Dr. Eva입니다. 감정보단 이성을 중시하며, 모든 주장에 대해 근거를 요구합니다. 간결하고 명확하게 핵심을 짚어주세요.",
+    description: "데이터와 사실에 기반하여 논리적이고 비판적인 분석을 제공하는 AI 분석가. 감정보단 이성을 중시하며, 모든 주장에 대해 근거를 요구합니다.",
   },
   helios: {
     name: "Helios (비저너리)",
-    prompt: "당신은 기술의 미래에 대한 긍정적이고 창의적인 비전을 제시하는 AI 비저너리 Helios입니다. 가능성에 초점을 맞추고, 혁신적인 아이디어를 대담하게 제시합니다. 이전 토론자의 의견을 이어받아, 더 나은 미래를 위한 대안이나 발전 방향을 제안해주세요.",
+    description: "기술의 미래에 대한 긍정적이고 창의적인 비전을 제시하는 AI 비저너리. 가능성에 초점을 맞추고, 혁신적인 아이디어를 대담하게 제시합니다.",
   }
 };
 
+// 마스터 프롬프트 생성 함수
+function createMasterPrompt(
+  personaName: string,
+  personaDescription: string,
+  userQuery: string,
+  opponentName: string = "",
+  opponentStatement: string = ""
+): string {
+  return `# ROLE:
+You are ${personaName}, an AI Gladiator participating in the AI Arena Championship. Your persona is "${personaDescription}". You must maintain this persona throughout the debate.
+
+# DEBATE TOPIC:
+"${userQuery}"
+
+# PREVIOUS TURN:
+${opponentStatement ? `The previous statement from your opponent, ${opponentName}, was:
+"""
+${opponentStatement}
+"""` : "This is the opening statement of the debate. No previous opponent statement exists."}
+
+# YOUR MISSION:
+Your task is to provide a compelling ${opponentStatement ? 'counter-argument or supplementary point to your opponent\'s statement' : 'opening argument on the debate topic'}. Your response MUST be structured as a JSON object with the following keys. Do NOT output anything other than this JSON object.
+
+# JSON OUTPUT FORMAT:
+{
+  "persona": "${personaName}",
+  "key_takeaway": "A single, powerful sentence that summarizes your core argument. This must be concise and impactful.",
+  "analysis": "A detailed, multi-paragraph analysis supporting your key takeaway. Use markdown for formatting (e.g., lists, bolding). Cite credible sources if possible, like (Source: Organization Name).",
+  "confidence_score": 85,
+  "counter_prompt": "A sharp, open-ended question directed at your opponent to challenge their position and continue the debate."
+}
+
+Remember: Output ONLY the JSON object. No additional text, explanations, or formatting.`;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // URL에서 사용자 질문 추출
+  const url = new URL(req.url!, `http://${req.headers.host}`);
+  const userQuery = url.searchParams.get('q') || '인공지능의 미래에 대해 토론해주세요';
+
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-  
-  // 임시 사용자 질문 (향후 Frontend에서 받아올 예정)
-  const userQuery = "인공지능이 인간의 일자리를 대체할 것이라는 주장에 대해 어떻게 생각하나요?";
 
-  // 스트림 응답을 위한 ReadableStream 생성
+  // 스트리밍 응답을 위한 ReadableStream 생성
   const stream = new ReadableStream({
     async start(controller) {
-      const encoder = new TextEncoder();
-      const sendData = (data: string) => controller.enqueue(encoder.encode(data));
+      const sendData = (data: string) => {
+        controller.enqueue(new TextEncoder().encode(data));
+      };
 
       try {
-        // --- 1. Dr. Eva의 첫 번째 답변 ---
-        sendData(`\n\n**[${personas.eva.name}]**\n`);
-        const evaStream = await openai.chat.completions.create({
+        // --- 1. Dr. Eva의 첫 번째 발언 ---
+        const evaPrompt = createMasterPrompt(
+          personas.eva.name,
+          personas.eva.description,
+          userQuery
+        );
+
+        const evaResponse = await openai.chat.completions.create({
           model: 'gpt-4o',
           messages: [
-            { role: 'system', content: personas.eva.prompt },
-            { role: 'user', content: userQuery }
+            { role: 'system', content: 'You are a professional debate AI. Always respond with valid JSON only.' },
+            { role: 'user', content: evaPrompt }
           ],
-          stream: true,
+          temperature: 0.8,
+          max_tokens: 1000,
         });
 
-        let evasResponse = '';
-        for await (const chunk of evaStream) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          evasResponse += content;
-          sendData(content);
+        const evaContent = evaResponse.choices[0]?.message?.content || '{}';
+        
+        // Eva의 응답을 스트리밍으로 전송
+        sendData(evaContent + '\n\n');
+
+        // Eva의 응답을 파싱하여 Helios에게 전달
+        let evaStatement = '';
+        try {
+          const evaJson = JSON.parse(evaContent);
+          evaStatement = evaJson.analysis || evaJson.key_takeaway || '';
+        } catch (e) {
+          evaStatement = evaContent;
         }
+
+        // 잠시 대기 (자연스러운 토론 흐름)
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         // --- 2. Helios의 반박 또는 보충 답변 ---
-        sendData(`\n\n**[${personas.helios.name}]**\n`);
-        const heliosStream = await openai.chat.completions.create({
+        const heliosPrompt = createMasterPrompt(
+          personas.helios.name,
+          personas.helios.description,
+          userQuery,
+          personas.eva.name,
+          evaStatement
+        );
+
+        const heliosResponse = await openai.chat.completions.create({
           model: 'gpt-4o',
           messages: [
-            { role: 'system', content: personas.helios.prompt },
-            { role: 'user', content: `${userQuery}\n\n이전 토론자(Dr. Eva)의 의견은 다음과 같습니다: "${evasResponse}"` }
+            { role: 'system', content: 'You are a professional debate AI. Always respond with valid JSON only.' },
+            { role: 'user', content: heliosPrompt }
           ],
-          stream: true,
+          temperature: 0.8,
+          max_tokens: 1000,
         });
 
-        for await (const chunk of heliosStream) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          sendData(content);
-        }
+        const heliosContent = heliosResponse.choices[0]?.message?.content || '{}';
         
-        sendData('\n\n--- 토론 종료 ---');
+        // Helios의 응답을 스트리밍으로 전송
+        sendData(heliosContent + '\n\n');
 
       } catch (error) {
-        console.error('스트리밍 오류:', error);
-        sendData('\n\n[오류] AI 응답을 생성하는 중 문제가 발생했습니다.');
+        console.error('AI Arena 스트리밍 오류:', error);
+        
+        // 오류 발생 시 기본 응답
+        const errorResponse = {
+          persona: "System",
+          key_takeaway: "죄송합니다. AI Arena에서 기술적 문제가 발생했습니다.",
+          analysis: "현재 AI 검투사들이 일시적으로 연결되지 않습니다. 잠시 후 다시 시도해주세요.",
+          confidence_score: 0,
+          counter_prompt: "다른 주제로 토론을 시작해보시겠어요?"
+        };
+        
+        sendData(JSON.stringify(errorResponse) + '\n\n');
       } finally {
         controller.close();
       }

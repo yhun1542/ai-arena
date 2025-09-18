@@ -1,190 +1,145 @@
-import React, { useState } from 'react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Separator } from '../components/ui/separator';
-import { Badge } from '../components/ui/badge';
-import { ScrollArea } from '../components/ui/scroll-area';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Bot, Sparkles, Frown, ThumbsUp, Home } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface Message {
-  id: string;
-  speaker: string;
-  content: string;
-  timestamp: Date;
+// AI 응답 데이터 구조 정의
+interface ArenaResponse {
+  persona: string;
+  key_takeaway: string;
+  analysis: string;
+  confidence_score: number;
+  counter_prompt: string;
 }
 
-const DiscussionPage: React.FC = () => {
-  const [question, setQuestion] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+// AI 페르소나 정보
+const PERSONAS = {
+  "Dr. Eva (분석가)": { icon: Bot, color: "text-blue-500" },
+  "Helios (비저너리)": { icon: Sparkles, color: "text-amber-500" }
+};
 
-  const handleStartDiscussion = async (): Promise<void> => {
-    if (!question.trim()) return;
+export default function DiscussionPage() {
+  const [searchParams] = useSearchParams();
+  const userQuery = searchParams.get('q');
+  const discussionId = searchParams.get('id');
 
-    setIsLoading(true);
-    setMessages([]);
+  const [debate, setDebate] = useState<ArenaResponse[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const hasStarted = useRef(false);
 
-    try {
-      const response = await fetch('/api/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: question.trim() }),
-      });
+  useEffect(() => {
+    // UX 개선: 페이지 로드 시 단 한 번만 자동으로 토론 스트리밍 시작
+    if (!userQuery || !discussionId || hasStarted.current) return;
+    hasStarted.current = true;
 
-      const data = await response.json();
+    const startDebate = async () => {
+      setIsLoading(true);
+      setError('');
+      try {
+        // BUG FIX: 사용자의 실제 질문(userQuery)을 API로 전달
+        const response = await fetch(`/api/stream?q=${encodeURIComponent(userQuery)}`);
+        if (!response.ok || !response.body) {
+          throw new Error('AI 아레나 서버에 연결할 수 없습니다.');
+        }
 
-      if (!response.ok) {
-        throw new Error(data.message || `HTTP ${response.status}`);
-      }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-      // 스트리밍 응답 처리
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let currentMessage = '';
-      let currentSpeaker = '';
-
-      if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          
+          // AI가 보낸 JSON 객체를 파싱하여 화면에 표시
+          // 여러 JSON 객체가 붙어서 올 수 있으므로 분리해서 처리
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || ''; // 마지막 불완전한 객체는 버퍼에 남김
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('**[') && line.includes(']**')) {
-              // 새로운 화자 시작
-              if (currentMessage && currentSpeaker) {
-                setMessages(prev => [...prev, {
-                  id: Date.now().toString(),
-                  speaker: currentSpeaker,
-                  content: currentMessage.trim(),
-                  timestamp: new Date()
-                }]);
-              }
-              currentSpeaker = line.match(/\*\*\[(.*?)\]\*\*/)?.[1] || '';
-              currentMessage = '';
-            } else if (line.trim()) {
-              currentMessage += line + '\n';
+          for (const part of parts) {
+            try {
+              const parsed = JSON.parse(part);
+              setDebate(prev => [...prev, parsed]);
+            } catch (e) {
+              console.warn("JSON 파싱 오류 (스트리밍 중에는 정상일 수 있음):", part);
             }
           }
         }
-
-        // 마지막 메시지 추가
-        if (currentMessage && currentSpeaker) {
-          setMessages(prev => [...prev, {
-            id: Date.now().toString(),
-            speaker: currentSpeaker,
-            content: currentMessage.trim(),
-            timestamp: new Date()
-          }]);
-        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '알 수 없는 오류 발생');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('토론 시작 오류:', error);
-      setMessages([{
-        id: 'error',
-        speaker: 'System',
-        content: `오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`,
-        timestamp: new Date()
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === 'Enter' && !isLoading) {
-      handleStartDiscussion();
-    }
-  };
+    startDebate();
+  }, [userQuery, discussionId]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Arena</h1>
-          <p className="text-lg text-gray-600">두 AI가 펼치는 지적 토론의 장</p>
-        </div>
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold tracking-tighter">AI ARENA</h1>
+          <p className="text-lg text-gray-400 mt-2">"{userQuery}"</p>
+        </header>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>토론 주제 입력</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input
-                placeholder="토론하고 싶은 주제를 입력하세요..."
-                value={question}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuestion(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleStartDiscussion}
-                disabled={isLoading || !question.trim()}
-                className="px-6"
-              >
-                {isLoading ? '토론 중...' : '토론 시작'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {messages.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span>AI 토론</span>
-                <Badge variant="secondary">{messages.length}개 발언</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-96">
-                <div className="space-y-4">
-                  {messages.map((message, index) => (
-                    <div key={message.id} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Badge 
-                          variant={message.speaker.includes('Eva') ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {message.speaker}
-                        </Badge>
-                        <span className="text-xs text-gray-500">
-                          {message.timestamp.toLocaleTimeString()}
-                        </span>
+        <main className="space-y-6">
+          <AnimatePresence>
+            {debate.map((turn, index) => {
+              const PersonaIcon = PERSONAS[turn.persona]?.icon || Frown;
+              const personaColor = PERSONAS[turn.persona]?.color || "text-gray-400";
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.2 }}
+                >
+                  <Card className="bg-gray-800 border-gray-700 shadow-lg">
+                    <CardHeader className="flex flex-row items-center space-x-4">
+                      <PersonaIcon className={`h-8 w-8 ${personaColor}`} />
+                      <div>
+                        <CardTitle className={`text-xl font-semibold ${personaColor}`}>{turn.persona}</CardTitle>
+                        <p className="text-sm text-gray-400">자신감 점수: {turn.confidence_score}</p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {message.content}
-                        </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h3 className="font-bold text-lg text-amber-300">핵심 결론</h3>
+                        <p className="text-gray-200 mt-1">{turn.key_takeaway}</p>
                       </div>
-                      {index < messages.length - 1 && <Separator className="my-2" />}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
+                      <Separator className="bg-gray-700" />
+                      <div>
+                        <h3 className="font-bold text-lg">상세 분석</h3>
+                        <div className="prose prose-invert mt-2 text-gray-300" dangerouslySetInnerHTML={{ __html: turn.analysis.replace(/\n/g, '<br />') }} />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center bg-gray-800/50 p-4">
+                       <p className="text-sm italic text-gray-400">"{turn.counter_prompt}"</p>
+                       <Button variant="outline" className="text-white border-sky-500 hover:bg-sky-500">
+                         <ThumbsUp className="mr-2 h-4 w-4" /> 더 설득력 있어요
+                       </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
-        {isLoading && (
-          <Card className="mt-6">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center space-x-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="text-gray-600">AI들이 토론을 준비하고 있습니다...</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {isLoading && (
+             <div className="text-center text-gray-400 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 mr-2 animate-pulse text-amber-300" />
+                AI 검투사들이 격렬하게 토론 중입니다...
+             </div>
+          )}
+          {error && <p className="text-red-500 text-center">{error}</p>}
+        </main>
       </div>
     </div>
   );
-};
-
-export default DiscussionPage;
+}
