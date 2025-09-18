@@ -5,24 +5,51 @@ const GROK_API_KEY = process.env.XAI_API_KEY;
 const API_URL = 'https://api.x.ai/v1/chat/completions';
 
 export async function callGrok(prompt: string, model: string): Promise<string> {
-  // 현재는 fallback 응답 사용 (실제 구현 시 Grok API 연동)
   if (!GROK_API_KEY) {
-    console.warn('⚠️ Grok API key not configured, using fallback response');
-    return generateGrokFallback(prompt, model);
+    throw new Error('xAI API key is not configured');
   }
 
   try {
-    // 실제 Grok API 호출 로직이 여기에 들어갑니다
-    // const response = await fetch(API_URL, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${GROK_API_KEY}`,
-    //   },
-    //   body: JSON.stringify({
-    //     model: model,
-    //     messages: [
-    //       {
+    // 실제 Grok API 호출
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }],
+        max_tokens: 4000,
+        temperature: 0.7,
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.1
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Grok API call failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error('No response choices returned from Grok');
+    }
+
+    const content = data.choices[0].message.content;
+    
+    if (!content) {
+      throw new Error('Empty content returned from Grok');
+    }
+
+    console.log(`✅ Grok ${model} 응답 완료`);
+    return content;
     //         role: 'user',
     //         content: prompt
     //       }

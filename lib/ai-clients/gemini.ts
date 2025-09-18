@@ -5,28 +5,49 @@ const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 export async function callGemini(prompt: string, model: string): Promise<string> {
-  // 현재는 OpenAI를 fallback으로 사용 (실제 구현 시 Gemini API 연동)
   if (!GEMINI_API_KEY) {
-    console.warn('⚠️ Gemini API key not configured, using fallback response');
-    return generateGeminiFallback(prompt, model);
+    throw new Error('Google API key is not configured');
   }
 
   try {
-    // 실제 Gemini API 호출 로직이 여기에 들어갑니다
-    // const response = await fetch(`${API_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     contents: [{
-    //       parts: [{ text: prompt }]
-    //     }]
-    //   }),
-    // });
+    // 실제 Gemini API 호출
+    const response = await fetch(`${API_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 4000,
+          temperature: 0.7,
+          topP: 0.9,
+          topK: 40
+        }
+      }),
+    });
 
-    console.log(`✅ Gemini ${model} 응답 완료 (fallback)`);
-    return generateGeminiFallback(prompt, model);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Gemini API call failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error('No response candidates returned from Gemini');
+    }
+
+    const content = data.candidates[0]?.content?.parts?.[0]?.text;
+    
+    if (!content) {
+      throw new Error('Empty content returned from Gemini');
+    }
+
+    console.log(`✅ Gemini ${model} 응답 완료`);
+    return content;
 
   } catch (error) {
     console.error('❌ Gemini API 호출 실패:', error);

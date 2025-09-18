@@ -5,24 +5,49 @@ const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY;
 const API_URL = 'https://api.anthropic.com/v1/messages';
 
 export async function callClaude(prompt: string, model: string): Promise<string> {
-  // 현재는 fallback 응답 사용 (실제 구현 시 Claude API 연동)
   if (!CLAUDE_API_KEY) {
-    console.warn('⚠️ Claude API key not configured, using fallback response');
-    return generateClaudeFallback(prompt, model);
+    throw new Error('Anthropic API key is not configured');
   }
 
   try {
-    // 실제 Claude API 호출 로직이 여기에 들어갑니다
-    // const response = await fetch(API_URL, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'x-api-key': CLAUDE_API_KEY,
-    //     'anthropic-version': '2023-06-01'
-    //   },
-    //   body: JSON.stringify({
-    //     model: model,
-    //     max_tokens: 4000,
+    // 실제 Claude API 호출
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 4000,
+        temperature: 0.7,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Claude API call failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.content || data.content.length === 0) {
+      throw new Error('No content returned from Claude');
+    }
+
+    const content = data.content[0]?.text;
+    
+    if (!content) {
+      throw new Error('Empty content returned from Claude');
+    }
+
+    console.log(`✅ Claude ${model} 응답 완료`);
+    return content;
     //     messages: [
     //       {
     //         role: 'user',
