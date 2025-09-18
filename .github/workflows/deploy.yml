@@ -37,5 +37,4 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # main 브랜치일 때만 프로덕션 배포, 그 외(PR 등)는 프리뷰 배포
-          prod: ${{ github.ref == 'refs/heads/main' }}
+          prod: ${{ github.ref == 'refs/heads/main' }}ㅍ
