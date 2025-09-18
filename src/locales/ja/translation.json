@@ -13,5 +13,15 @@
   "invalidInput": "議論トピックを入力してください",
   "back": "ホームに戻る",
   "retry": "再試行",
-  "close": "閉じる"
+  "close": "閉じる",
+  "aiArenaTitle": "AI Arena",
+  "aiArenaSubtitle": "AI剣闘士の知的対決",
+  "championshipStart": "チャンピオンシップ開始",
+  "arenaPreparation": "アリーナ準備中...",
+  "discussionInProgress": "議論進行中",
+  "analysisComplete": "分析完了",
+  "confidenceScore": "信頼度",
+  "keyTakeaway": "重要なポイント",
+  "analysis": "分析",
+  "counterPrompt": "反論ポイント"
 }

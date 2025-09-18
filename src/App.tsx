@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DiscussionPage from './pages/DiscussionPage';
+import LanguageSelector from './components/LanguageSelector';
+import './i18n'; // i18n 설정 로드
 import './App.css';
 import { LoaderCircle, Search } from 'lucide-react';
 
 function HomePage() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -14,7 +19,7 @@ function HomePage() {
 
   const handleStartDiscussion = async () => {
     if (!query.trim()) {
-      setError('토론할 주제를 입력해주세요.');
+      setError(t('invalidInput'));
       return;
     }
 
@@ -45,7 +50,7 @@ function HomePage() {
       navigate(`/discussion?id=${discussionId}&q=${encodeURIComponent(query.trim())}`);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+      setError(err instanceof Error ? err.message : t('error'));
     } finally {
       setIsLoading(false);
     }
@@ -58,13 +63,29 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center p-4">
-      <main className="flex flex-col justify-center items-center text-center w-full max-w-2xl">
+    <>
+      <Helmet>
+        <title>{t('pageTitle')}</title>
+        <meta name="description" content={t('subheadline')} />
+        <meta property="og:title" content={t('pageTitle')} />
+        <meta property="og:description" content={t('subheadline')} />
+        <meta name="twitter:title" content={t('pageTitle')} />
+        <meta name="twitter:description" content={t('subheadline')} />
+      </Helmet>
+      
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center p-4">
+        {/* 언어 선택기 */}
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
+        
+        <main className="flex flex-col justify-center items-center text-center w-full max-w-2xl">
         <header className="mb-10">
           <h1 className="text-6xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-amber-400">
             AI Arena
           </h1>
-          <p className="text-xl text-gray-400 mt-2">AI 검투사들의 지적 대결</p>
+          <h2 className="text-xl text-gray-400 mt-2">{t('headline')}</h2>
+          <p className="text-lg text-gray-500 mt-2">{t('subheadline')}</p>
         </header>
 
         <div className="w-full max-w-md space-y-4">
@@ -72,7 +93,7 @@ function HomePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
               type="text"
-              placeholder="토론할 주제를 입력하세요..."
+              placeholder={t('placeholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -89,27 +110,30 @@ function HomePage() {
             {isLoading ? (
               <>
                 <LoaderCircle className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                아레나 준비 중...
+                {t('button_starting')}
               </>
             ) : (
-              '챔피언십 시작'
+              t('button_start')
             )}
           </Button>
           {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
       </main>
     </div>
+    </>
   );
 }
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/discussion" element={<DiscussionPage />} />
-      </Routes>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/discussion" element={<DiscussionPage />} />
+        </Routes>
+      </Router>
+    </HelmetProvider>
   );
 }
 
