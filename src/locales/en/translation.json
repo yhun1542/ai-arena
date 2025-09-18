@@ -1,0 +1,15 @@
+{
+  "title": "AI Arena - Discussion Platform with AI",
+  "subtitle": "Engage in discussions on various topics with AI",
+  "searchPlaceholder": "Enter a topic you'd like to discuss...",
+  "startDiscussion": "Start Discussion",
+  "discussionTitle": "AI Response",
+  "getAiResponse": "Get AI Response",
+  "loading": "Loading",
+  "error": "An error occurred",
+  "networkError": "Please check your network connection",
+  "invalidInput": "Please enter your question",
+  "back": "Back to Home",
+  "retry": "Retry",
+  "close": "Close"
+}
