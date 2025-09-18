@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DiscussionPage from './pages/DiscussionPage';
 import LanguageSelector from './components/LanguageSelector';
+import { v4 as uuidv4 } from 'uuid';
 import './i18n'; // i18n 설정 로드
 import './App.css';
 import { LoaderCircle, Search } from 'lucide-react';
@@ -27,30 +28,13 @@ function HomePage() {
     setError('');
 
     try {
-      // 1. 백엔드에 토론 생성을 요청하여 고유 ID를 받습니다.
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: query.trim() }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || '토론을 생성할 수 없습니다.');
-      }
-
-      const { discussionId } = data;
-      if (!discussionId) {
-        throw new Error('고유 토론 ID를 받지 못했습니다.');
-      }
-
-      // 2. UX 개선: 받은 ID와 사용자의 질문(query)을 URL에 담아 토론 페이지로 이동시킵니다.
+      // 클라이언트 사이드에서 고유 토론 ID 생성
+      const discussionId = uuidv4();
+      
+      // UX 개선: 생성된 ID와 사용자의 질문(query)을 URL에 담아 토론 페이지로 이동
       navigate(`/discussion?id=${discussionId}&q=${encodeURIComponent(query.trim())}`);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('error'));
+      setError(err instanceof Error ? err.message : t('networkError'));
     } finally {
       setIsLoading(false);
     }
