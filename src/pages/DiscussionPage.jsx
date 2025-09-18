@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button.jsx'
+import LanguageSelector from '../components/LanguageSelector.jsx'
 
 function DiscussionPage() {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const discussionId = searchParams.get('id')
@@ -86,6 +89,11 @@ function DiscussionPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {/* 언어 선택기 */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+      
       <div className="max-w-4xl mx-auto px-4">
         {/* 헤더 */}
         <header className="mb-8">
@@ -99,7 +107,7 @@ function DiscussionPage() {
               variant="outline"
               className="px-6 py-2"
             >
-              홈으로 돌아가기
+              {t('back')}
             </Button>
           </div>
         </header>
@@ -107,7 +115,7 @@ function DiscussionPage() {
         {/* 토론 영역 */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">AI 응답</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">{t('discussionTitle')}</h2>
             
             {/* 스트리밍 컨트롤 */}
             <div className="mb-4">
@@ -122,10 +130,10 @@ function DiscussionPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    스트리밍 중...
+                    {t('loading')}...
                   </span>
                 ) : (
-                  'AI 응답 받기'
+                  t('getAiResponse')
                 )}
               </Button>
             </div>
@@ -145,7 +153,7 @@ function DiscussionPage() {
                 </pre>
               ) : (
                 <p className="text-gray-500 italic">
-                  {isStreaming ? '응답을 받고 있습니다...' : 'AI 응답 받기 버튼을 클릭하여 시작하세요.'}
+                  {isStreaming ? t('loading') + '...' : t('getAiResponse')}
                 </p>
               )}
               

@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import DiscussionPage from './pages/DiscussionPage.jsx'
+import LanguageSelector from './components/LanguageSelector.jsx'
+import './i18n' // i18n 설정 로드
 import './App.css'
 
 function HomePage() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -13,7 +17,7 @@ function HomePage() {
 
   const handleStartDiscussion = async () => {
     if (!query.trim()) {
-      setError('질문을 입력해주세요.')
+      setError(t('invalidInput'))
       return
     }
 
@@ -53,7 +57,7 @@ function HomePage() {
 
     } catch (error) {
       console.error('토론 시작 오류:', error)
-      setError(error.message || '토론을 시작할 수 없습니다. 다시 시도해주세요.')
+      setError(error.message || t('networkError'))
     } finally {
       setIsLoading(false)
     }
@@ -67,10 +71,15 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+      {/* 언어 선택기 */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+      
       <main className="flex flex-col justify-center items-center text-center max-w-2xl mx-auto px-4">
         <header className="mb-10">
           <h1 className="text-6xl font-bold text-gray-900 mb-4">AI Arena</h1>
-          <p className="text-xl text-gray-600">AI와 함께하는 토론의 장</p>
+          <p className="text-xl text-gray-600">{t('subtitle')}</p>
         </header>
 
         <div className="w-full max-w-md space-y-4">
@@ -78,7 +87,7 @@ function HomePage() {
             <Input
               id="q"
               type="text"
-              placeholder="무엇이 궁금하신가요?"
+              placeholder={t('searchPlaceholder')}
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value)
@@ -110,19 +119,19 @@ function HomePage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                토론 준비 중...
+                {t('loading')}
               </span>
             ) : (
-              '토론 시작'
+              t('startDiscussion')
             )}
           </Button>
         </div>
 
         <div className="mt-12 text-sm text-gray-500">
-          <p>AI와 함께 다양한 주제로 토론해보세요</p>
+          <p>{t('subtitle')}</p>
           {isLoading && (
             <p className="mt-2" role="status" aria-live="polite">
-              토론방을 생성하고 있습니다...
+              {t('loading')}...
             </p>
           )}
         </div>
