@@ -142,69 +142,8 @@ export default function SynapseResultPage() {
         
         // 질문에 맞는 동적 fallback 결과 생성
         const fallbackResult: SynapseResult = generateDynamicFallback(query, isComplex);
-        teams: [
-          {
-            name: "GPT-4o",
-            model: isComplex ? "gpt5" : "gpt-4o",
-            score: 94,
-            strengths: ["포괄적 분석", "실무적 접근", "명확한 단계별 가이드"],
-            concerns: ["일부 최신 동향 반영 부족"],
-            color: "team-openai",
-            icon: "🤖"
-          },
-          {
-            name: "Gemini",
-            model: isComplex ? "gemini-2.5-pro-deepthink" : "gemini-2.5-pro",
-            score: 91,
-            strengths: ["최신 기술 동향", "다각적 관점", "리스크 분석"],
-            concerns: ["구체적 실행 방안 부족"],
-            color: "team-google",
-            icon: "💎"
-          },
-          {
-            name: "Claude",
-            model: "claude-opus-4-1-20250805",
-            score: 89,
-            strengths: ["논리적 구조", "근거 제시", "균형잡힌 시각"],
-            concerns: ["혁신적 아이디어 제한적"],
-            color: "team-anthropic",
-            icon: "🧠"
-          },
-          {
-            name: "Grok",
-            model: isComplex ? "grok-4-heavy" : "grok-4-latest",
-            score: 87,
-            strengths: ["창의적 접근", "실시간 데이터", "파격적 제안"],
-            concerns: ["검증되지 않은 정보 포함 가능성"],
-            color: "team-xai",
-            icon: "⚡"
-          }
-        ],
-        highlights: [
-          {
-            type: 'flame',
-            content: "초기 제안된 '모든 업무의 블록체인화'는 비현실적. 선택과 집중이 핵심",
-            round: 2
-          },
-          {
-            type: 'insight',
-            content: "블록체인의 진정한 가치는 '탈중앙화'가 아닌 '투명성과 자동화'에 있음",
-            round: 3
-          },
-          {
-            type: 'defense',
-            content: "모든 비용 분석에 대해 3개 이상의 독립적인 연구 결과로 교차 검증 완료",
-            round: 4
-          }
-        ],
-        metadata: {
-          complexity: isComplex ? 'advanced' : 'standard',
-          totalRounds: 4,
-          processingTime: 8000
-        }
-      };
-      
-      setResult(fallbackResult);
+        
+        setResult(fallbackResult);
       } finally {
         setIsLoading(false);
       }
