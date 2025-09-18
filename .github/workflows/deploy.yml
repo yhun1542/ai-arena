@@ -16,8 +16,9 @@ jobs:
 
       - name: 2. Setup pnpm
         uses: pnpm/action-setup@v4
-       
-          
+        # package.json에 이미 packageManager가 지정돼 있다면 version 옵션은 빼는 게 안정적
+        # with:
+        #   version: 9
 
       - name: 3. Setup Node.js
         uses: actions/setup-node@v4
@@ -37,6 +38,5 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # main 브랜치면 프로덕션, 아니면 프리뷰
+          # main 브랜치면 프로덕션, 그 외에는 프리뷰
           prod: ${{ github.ref == 'refs/heads/main' }}
-
