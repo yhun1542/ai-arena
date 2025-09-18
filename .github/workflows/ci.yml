@@ -1,7 +1,9 @@
 name: CI
 on:
-  pull_request: { branches: [ main ] }
-  push: { branches: [ feature/* ] }
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ feature/* ]
 
 jobs:
   build-test:
@@ -9,9 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4   # version 옵션 제거
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build --if-present
 
@@ -26,4 +28,5 @@ jobs:
       status: "${{ needs.build-test.result }}"
       notes: "CI ${{ needs.build-test.result }}"
     secrets: inherit
+
 
