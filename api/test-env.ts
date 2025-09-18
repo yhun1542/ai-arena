@@ -37,7 +37,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
           }),
         });
         
-        openaiTest = response.ok ? 'SUCCESS' : `ERROR_${testResponse.status}`;
+        openaiTest = testResponse.ok ? 'SUCCESS' : `ERROR_${testResponse.status}`;
       } catch (error) {
         openaiTest = `FETCH_ERROR: ${error instanceof Error ? error.message : 'Unknown'}`;
       }
