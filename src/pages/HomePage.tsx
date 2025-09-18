@@ -41,33 +41,24 @@ export default function HomePage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-6">
         <div className="w-full flex flex-col items-center">
           
-          {/* Synapse 로고 - 첨부 이미지 기준 크기 */}
+          {/* Synapse 로고 - 뇌 아이콘을 오른쪽 위로 */}
           <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-8 mb-8">
-              <Brain className="w-24 h-24 text-synapse-primary" />
+            <div className="relative inline-block">
               <h1 className="font-bold gradient-text" style={{ fontSize: '12rem', lineHeight: '1' }}>Synapse</h1>
+              <Brain className="absolute -top-4 -right-8 w-32 h-32 text-synapse-primary" />
             </div>
           </div>
 
-          {/* 검색 폼 - 빨간색 영역만큼 대폭 확대 */}
-          <form onSubmit={handleSubmit} className="mb-8 w-full max-w-6xl">
-            <div className="relative w-full">
-              <textarea
+          {/* 검색 폼 - 한 줄 검색창으로 축소 */}
+          <form onSubmit={handleSubmit} className="mb-8 w-full max-w-4xl px-8">
+            <div className="relative">
+              <input
+                type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
-                className="synapse-textarea-enhanced text-xl py-6 px-8 pr-20 min-h-[120px] text-center resize-none w-full"
-                rows={1}
+                className="synapse-input-enhanced text-3xl py-4 px-6 pr-16 w-full text-center"
                 disabled={isAnalyzing}
-                style={{
-                  height: 'auto',
-                  minHeight: '120px'
-                }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = 'auto';
-                  target.style.height = `${Math.max(120, target.scrollHeight)}px`;
-                }}
               />
               <button
                 type="submit"

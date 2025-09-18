@@ -182,6 +182,27 @@
   transform: translateY(-50%) scale(0.95);
 }
 
+.synapse-input-enhanced {
+  background-color: #161B22;
+  border: 1px solid #8B949E;
+  border-radius: 2rem;
+  color: #E6EDF3;
+  font-family: 'GmarketSans', sans-serif;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.synapse-input-enhanced::placeholder {
+  color: #8B949E;
+  font-weight: 300;
+}
+
+.synapse-input-enhanced:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
 .gradient-text {
   background: linear-gradient(to right, #4A90E2, #FF41D5, #4A90E2);
   background-clip: text;
