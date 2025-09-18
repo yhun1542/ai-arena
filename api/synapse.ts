@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { runSynapseProcess } from '../lib/orchestrator';
+import { runDirectSynapseProcess } from '../lib/direct-synapse';
 
 export default async function handler(
   request: VercelRequest,
@@ -65,10 +65,8 @@ export default async function handler(
       timestamp: new Date().toISOString()
     });
 
-    // Synapse 프로세스 실행
-    const result = await runSynapseProcess({
-      query,
-      useAdvanced: shouldUseAdvanced,
+    // 간단한 직접 API 호출 방식으로 변경
+    const result = await runDirectSynapseProcess(query, shouldUseAdvanced, persona);houldUseAdvanced,
       persona: persona || {
         level: 'intermediate',
         tone: 'formal',
