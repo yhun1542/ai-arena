@@ -109,7 +109,7 @@ export default function DiscussionPage() {
             >
               "{userQuery}"
             </motion.p>
-            <p className="text-sm text-gray-500 mt-1">ID: {discussionId}</p>
+            <p className="text-sm text-gray-500 mt-1">세션: {discussionId.slice(0, 8)}...</p>
           </header>
 
           <main className="space-y-6">
@@ -130,7 +130,12 @@ export default function DiscussionPage() {
                     {/* 상태 표시 */}
                     <div className="flex items-center space-x-2">
                       {isStreaming && <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />}
-                      <span className="text-sm text-gray-300">{statusMessage}</span>
+                      <span className="text-sm text-gray-300">
+                        {statusMessage === 'connected' ? 'AI가 응답을 준비하고 있습니다...' : 
+                         statusMessage === 'streamCompleted' ? 'AI 응답이 완료되었습니다' : 
+                         statusMessage === 'streamError' ? '응답 중 오류가 발생했습니다' : 
+                         statusMessage}
+                      </span>
                     </div>
 
                     {/* 에러 메시지 */}
