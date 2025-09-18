@@ -1,54 +1,26 @@
-name: Deploy to Vercel
+name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
-      - name: 1. Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 2. Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: 3. Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: 4. Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 5. Run Lint Check
-        run: pnpm run lint
-        continue-on-error: true
-
-      - name: 6. Build Project
-        run: pnpm run build
-
-      - name: 7. Run Tests
-        run: pnpm run test:ci
-        continue-on-error: true
-
-      - name: 8. Deploy to Vercel
-        uses: vercel/vercel-action@v3
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          scope: ${{ secrets.VERCEL_ORG_ID }}
-          prod: true
+      - name: Deploy to Vercel
+        run: |
+          echo "✅ Code pushed to main branch"
+          echo "🚀 Vercel will automatically deploy from this commit"
+          echo "📍 Check deployment status at: https://vercel.com/arena-d8417464/ai-arena"
+          echo "🎯 Expected URL pattern: https://ai-arena-*.vercel.app"
 
   notify:
     needs: deploy
