@@ -1,4 +1,4 @@
-name: Build and Deploy to Vercel
+name: Build and Deploy to Vercel (CLI)
 
 on:
   push:
@@ -16,8 +16,6 @@ jobs:
 
       - name: 2. Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: 3. Setup Node.js
         uses: actions/setup-node@v4
@@ -29,13 +27,16 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 5. Build Project
-        run: pnpm run build # --if-present 옵션이 없는 것을 보장
+        run: pnpm run build
 
-      - name: 6. Deploy to Vercel
-        uses: vercel/vercel-action@v3
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # main 브랜치일 때만 프로덕션 배포, 그 외(PR 등)는 프리뷰 배포
-          prod: ${{ github.ref == 'refs/heads/main' }}
+      - name: 6. Deploy with Vercel CLI
+        run: |
+          npm install -g vercel@latest
+          vercel deploy \
+            ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} \
+            --yes \
+            --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
