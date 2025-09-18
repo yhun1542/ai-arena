@@ -49,15 +49,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 검색 폼 - 한 줄 검색창으로 축소 */}
-          <form onSubmit={handleSubmit} className="mb-8 w-full max-w-4xl px-8">
+          {/* 검색 폼 - 세로는 넉넉하게, 가로는 적당히 */}
+          <form onSubmit={handleSubmit} className="mb-8 w-full max-w-3xl px-12">
             <div className="relative">
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
-                className="synapse-input-enhanced text-3xl py-4 px-6 pr-16 w-full text-center"
+                className="synapse-input-enhanced text-3xl py-8 px-8 pr-20 w-full text-center"
                 disabled={isAnalyzing}
               />
               <button
