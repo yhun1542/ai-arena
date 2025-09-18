@@ -13,5 +13,15 @@
   "invalidInput": "Please enter a discussion topic",
   "back": "Back to Home",
   "retry": "Retry",
-  "close": "Close"
+  "close": "Close",
+  "aiArenaTitle": "AI Arena",
+  "aiArenaSubtitle": "Intellectual Battle of AI Gladiators",
+  "championshipStart": "Start Championship",
+  "arenaPreparation": "Preparing Arena...",
+  "discussionInProgress": "Discussion in Progress",
+  "analysisComplete": "Analysis Complete",
+  "confidenceScore": "Confidence Score",
+  "keyTakeaway": "Key Takeaway",
+  "analysis": "Analysis",
+  "counterPrompt": "Counter Point"
 }

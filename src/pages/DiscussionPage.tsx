@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Bot, Sparkles, Frown, ThumbsUp, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LanguageSelector from '../components/LanguageSelector';;
 
 // AI 응답 데이터 구조 정의
 interface ArenaResponse {
@@ -22,6 +25,7 @@ const PERSONAS = {
 };
 
 export default function DiscussionPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const userQuery = searchParams.get('q');
   const discussionId = searchParams.get('id');

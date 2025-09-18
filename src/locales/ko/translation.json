@@ -13,5 +13,15 @@
   "invalidInput": "토론 주제를 입력해주세요",
   "back": "홈으로 돌아가기",
   "retry": "다시 시도",
-  "close": "닫기"
+  "close": "닫기",
+  "aiArenaTitle": "AI Arena",
+  "aiArenaSubtitle": "AI 검투사들의 지적 대결",
+  "championshipStart": "챔피언십 시작",
+  "arenaPreparation": "아레나 준비 중...",
+  "discussionInProgress": "토론 진행 중",
+  "analysisComplete": "분석 완료",
+  "confidenceScore": "신뢰도",
+  "keyTakeaway": "핵심 요점",
+  "analysis": "분석",
+  "counterPrompt": "반박 포인트"
 }
