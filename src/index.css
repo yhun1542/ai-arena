@@ -1,17 +1,347 @@
+/* Gmarket Sans 폰트 임포트 */
+@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');
+@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+@import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+
+/* Noto Sans 폰트 임포트 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* 폰트 페이스 정의 */
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 300;
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');
 }
 
-#root {
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 400;
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 700;
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+}
+
+/* 기본 스타일 */
+@layer base {
+  * {
+    border-color: #30363D;
+  }
+  
+  body {
+    background-color: #0D1117;
+    color: #E6EDF3;
+    font-family: 'GmarketSans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'GmarketSans', sans-serif;
+    font-weight: 700;
+  }
+  
+  /* 스크롤바 스타일링 */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: #0D1117;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #8B949E;
+    border-radius: 9999px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #4A90E2;
+  }
+}
+
+/* 컴포넌트 스타일 */
+.synapse-card {
+  background-color: #161B22;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #30363D;
+}
+
+.synapse-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.synapse-button-primary {
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+}
+
+.synapse-button-primary:hover {
+  background-color: #2563eb;
+}
+
+.synapse-button-secondary {
+  background-color: #161B22;
+  color: #E6EDF3;
+  border: 1px solid #30363D;
+}
+
+.synapse-input {
   width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #161B22;
+  border: 1px solid #30363D;
+  border-radius: 0.75rem;
+  color: #E6EDF3;
+  transition: all 0.2s;
+}
+
+.synapse-input:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.synapse-textarea {
+  resize: none;
+}
+
+.synapse-textarea-enhanced {
+  width: 100%;
+  padding: 1.25rem 5rem 1.25rem 1.5rem;
+  font-family: 'GmarketSans', sans-serif;
+  font-weight: 500;
+  font-size: 1.375rem;
+  background-color: #161B22;
+  border: 1px solid #8B949E;
+  border-radius: 2.25rem;
+  color: #E6EDF3;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: height 0.2s ease-in-out, border-color 0.2s ease;
+}
+
+.synapse-textarea-enhanced::placeholder {
+  color: #8B949E;
+  font-weight: 300;
+}
+
+.synapse-textarea-enhanced:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.synapse-search-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.synapse-search-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.synapse-search-button:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.synapse-input-enhanced {
+  background-color: #161B22;
+  border: 1px solid #8B949E;
+  border-radius: 2rem;
+  color: #E6EDF3;
+  font-family: 'GmarketSans', sans-serif;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.synapse-input-enhanced::placeholder {
+  color: #8B949E;
+  font-weight: 300;
+}
+
+.synapse-input-enhanced:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* 개선된 HomePage 스타일 구조 */
+.container {
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: #0D1117;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title-container {
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-family: 'GmarketSans', sans-serif;
+  font-size: 12rem;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(to right, #4A90E2, #FF41D5, #4A90E2);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease-in-out infinite;
+}
+
+.brain-icon {
+  position: absolute;
+  top: -1rem;
+  right: -2rem;
+  width: 8rem;
+  height: 8rem;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(93%) saturate(1352%) hue-rotate(87deg) brightness(119%) contrast(119%);
+}
+
+.form {
+  width: 100%;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1.5rem 2rem;
+  font-size: 1.5rem;
+  font-family: 'GmarketSans', sans-serif;
+  font-weight: 500;
+  background-color: #161B22;
+  border: 1px solid #8B949E;
+  border-radius: 2rem;
+  color: #E6EDF3;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: #8B949E;
+  font-weight: 300;
+}
+
+.search-input:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.search-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5rem;
+  height: 3.5rem;
+  background-color: #3B82F6;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #2563EB;
+}
+
+.search-button:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.search-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #4A90E2, #FF41D5, #4A90E2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradient 6s ease infinite;
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+/* 유틸리티 */
+.text-balance {
+  text-wrap: balance;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

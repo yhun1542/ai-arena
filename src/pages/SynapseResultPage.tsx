@@ -1,0 +1,453 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
+import { 
+  Award, 
+  CheckCircle, 
+  BarChart2, 
+  AlertTriangle, 
+  ArrowLeft,
+  Brain,
+  Flame, 
+  Zap, 
+  Shield,
+  ExternalLink,
+  RefreshCw,
+  Trophy,
+  Target,
+  Users
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+
+interface AITeamResult {
+  name: string;
+  model: string;
+  score: number;
+  strengths: string[];
+  concerns: string[];
+  color: string;
+  icon: string;
+}
+
+interface SynapseResult {
+  finalAnswer: {
+    summary: string[];
+    evidence: string[];
+    sources: string[];
+    checkList: string[];
+  };
+  teams: AITeamResult[];
+  highlights: {
+    type: 'flame' | 'insight' | 'defense';
+    content: string;
+    round: number;
+  }[];
+  metadata: {
+    complexity: 'standard' | 'advanced';
+    totalRounds: number;
+    processingTime: number;
+  };
+}
+
+export default function SynapseResultPage() {
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  
+  const query = searchParams.get('q') || '';
+  const isComplex = searchParams.get('complex') === 'true';
+  
+  const [result, setResult] = useState<SynapseResult | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentRound, setCurrentRound] = useState(1);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // 시뮬레이션된 결과 데이터 (실제로는 API에서 가져옴)
+  useEffect(() => {
+    const simulateProcessing = async () => {
+      setIsLoading(true);
+      
+      // 4라운드 시뮬레이션
+      for (let round = 1; round <= 4; round++) {
+        setCurrentRound(round);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      // 최종 결과 설정
+      const mockResult: SynapseResult = {
+        finalAnswer: {
+          summary: [
+            "블록체인 기술의 비즈니스 적용은 **공급망 투명성**, **디지털 자산 관리**, **스마트 계약 자동화** 세 영역에서 가장 높은 ROI를 보입니다.",
+            "성공적인 도입을 위해서는 **기술적 인프라 구축**(6-12개월), **법적 컴플라이언스 확보**(3-6개월), **조직 역량 개발**(12-18개월)의 단계적 접근이 필요합니다.",
+            "초기 투자비용은 중소기업 기준 **5억-20억원** 수준이며, 3년 내 **30-50%의 운영비 절감** 효과를 기대할 수 있습니다."
+          ],
+          evidence: [
+            "McKinsey Global Institute 보고서에 따르면 블록체인 도입 기업의 87%가 운영 효율성 향상을 보고",
+            "Deloitte 2024 조사: 공급망 분야 블록체인 적용 시 평균 23% 비용 절감 달성",
+            "PwC 분석: 스마트 계약 도입으로 계약 처리 시간 65% 단축 및 분쟁 발생률 40% 감소"
+          ],
+          sources: [
+            "McKinsey Global Institute - Blockchain Technology Report 2024",
+            "Deloitte - Supply Chain Blockchain Implementation Study",
+            "PwC - Smart Contract Business Impact Analysis"
+          ],
+          checkList: [
+            "현재 비즈니스 프로세스 중 자동화 가능한 영역 식별",
+            "블록체인 플랫폼 선택 (Ethereum, Hyperledger, Polygon 등)",
+            "파일럿 프로젝트 설계 및 ROI 측정 지표 설정",
+            "법무팀과 규제 준수 방안 검토",
+            "IT 인프라 및 보안 체계 점검",
+            "직원 교육 프로그램 수립"
+          ]
+        },
+        teams: [
+          {
+            name: "GPT-4o",
+            model: isComplex ? "gpt5" : "gpt-4o",
+            score: 94,
+            strengths: ["포괄적 분석", "실무적 접근", "명확한 단계별 가이드"],
+            concerns: ["일부 최신 동향 반영 부족"],
+            color: "team-openai",
+            icon: "🤖"
+          },
+          {
+            name: "Gemini",
+            model: isComplex ? "gemini-2.5-pro-deepthink" : "gemini-2.5-pro",
+            score: 91,
+            strengths: ["최신 기술 동향", "다각적 관점", "리스크 분석"],
+            concerns: ["구체적 실행 방안 부족"],
+            color: "team-google",
+            icon: "💎"
+          },
+          {
+            name: "Claude",
+            model: "claude-opus-4-1-20250805",
+            score: 89,
+            strengths: ["논리적 구조", "근거 제시", "균형잡힌 시각"],
+            concerns: ["혁신적 아이디어 제한적"],
+            color: "team-anthropic",
+            icon: "🧠"
+          },
+          {
+            name: "Grok",
+            model: isComplex ? "grok-4-heavy" : "grok-4-latest",
+            score: 87,
+            strengths: ["창의적 접근", "실시간 데이터", "파격적 제안"],
+            concerns: ["검증되지 않은 정보 포함 가능성"],
+            color: "team-xai",
+            icon: "⚡"
+          }
+        ],
+        highlights: [
+          {
+            type: 'flame',
+            content: "초기 제안된 '모든 업무의 블록체인화'는 비현실적. 선택과 집중이 핵심",
+            round: 2
+          },
+          {
+            type: 'insight',
+            content: "블록체인의 진정한 가치는 '탈중앙화'가 아닌 '투명성과 자동화'에 있음",
+            round: 3
+          },
+          {
+            type: 'defense',
+            content: "모든 비용 분석에 대해 3개 이상의 독립적인 연구 결과로 교차 검증 완료",
+            round: 4
+          }
+        ],
+        metadata: {
+          complexity: isComplex ? 'advanced' : 'standard',
+          totalRounds: 4,
+          processingTime: 8000
+        }
+      };
+      
+      setResult(mockResult);
+      setIsLoading(false);
+    };
+
+    simulateProcessing();
+  }, [query, isComplex]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <motion.div
+            className="w-16 h-16 border-4 border-synapse-primary border-t-transparent rounded-full mx-auto mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <h2 className="text-2xl font-bold mb-2">Synapse 분석 진행 중</h2>
+          <p className="text-synapse-text-muted mb-4">
+            {currentRound <= 4 ? `Round ${currentRound}/4: ${
+              currentRound === 1 ? '초안 생성' :
+              currentRound === 2 ? '비판적 검토' :
+              currentRound === 3 ? '근거 보강' : '최종 종합'
+            }` : '결과 정리 중...'}
+          </p>
+          <div className="w-64 bg-synapse-surface rounded-full h-2 mx-auto">
+            <motion.div 
+              className="bg-synapse-primary h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(currentRound / 4) * 100}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!result) return null;
+
+  return (
+    <>
+      <Helmet>
+        <title>Synapse 분석 결과 - {query.slice(0, 50)}...</title>
+        <meta name="description" content={`4개 AI 팀이 협력하여 도출한 "${query}"에 대한 최적의 답변입니다.`} />
+      </Helmet>
+
+      <main className="min-h-screen bg-synapse-bg">
+        {/* 헤더 */}
+        <header className="sticky top-0 bg-synapse-bg/95 backdrop-blur-sm border-b border-synapse-border z-10">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="synapse-button-secondary flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                새 질문
+              </button>
+              <div className="flex items-center gap-2">
+                <Brain className="w-6 h-6 text-synapse-primary" />
+                <span className="font-bold text-lg">Synapse</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 text-sm text-synapse-text-muted">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4" />
+                <span>최고 점수: {Math.max(...result.teams.map(t => t.score))}/100</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                <span>{result.metadata.complexity === 'advanced' ? '고급' : '표준'} 모델</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* 질문 표시 */}
+          <motion.section 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="synapse-card">
+              <h1 className="text-2xl font-bold mb-2">분석 완료</h1>
+              <p className="text-lg text-synapse-text-muted">"{query}"</p>
+              <div className="flex items-center gap-4 mt-4 text-sm text-synapse-text-muted">
+                <span>세션: {id?.slice(-8)}</span>
+                <span>•</span>
+                <span>처리 시간: {(result.metadata.processingTime / 1000).toFixed(1)}초</span>
+                <span>•</span>
+                <span>{result.metadata.totalRounds}라운드 완료</span>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* 최종 답변 카드 */}
+          <motion.section 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="synapse-card border-synapse-primary/50 ring-1 ring-synapse-primary/20">
+              <div className="flex items-center gap-3 mb-6">
+                <Award className="w-8 h-8 text-synapse-primary" />
+                <h2 className="text-3xl font-bold">최종 결론</h2>
+              </div>
+              
+              <div className="prose prose-synapse max-w-none">
+                <div className="mb-6">
+                  <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-500" />
+                    핵심 요약
+                  </h3>
+                  {result.finalAnswer.summary.map((point, index) => (
+                    <div key={index} className="mb-3 p-4 bg-synapse-bg/50 rounded-lg">
+                      <ReactMarkdown>{point}</ReactMarkdown>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+                    <BarChart2 className="w-6 h-6 text-yellow-500" />
+                    주요 근거
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.finalAnswer.evidence.map((evidence, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <span className="w-2 h-2 bg-synapse-primary rounded-full mt-2 flex-shrink-0" />
+                        <span>{evidence}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+                    <CheckCircle className="w-6 h-6 text-blue-500" />
+                    실행 체크리스트
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {result.finalAnswer.checkList.map((item, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-synapse-surface/50 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+                    <ExternalLink className="w-6 h-6 text-synapse-secondary" />
+                    참고 자료
+                  </h3>
+                  <div className="space-y-2">
+                    {result.finalAnswer.sources.map((source, index) => (
+                      <div key={index} className="flex items-center gap-2 text-sm text-synapse-text-muted">
+                        <ExternalLink className="w-4 h-4" />
+                        <span>{source}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* AI 팀 비교 */}
+          <motion.section 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <Users className="w-7 h-7 text-synapse-primary" />
+              AI 팀 분석 결과
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {result.teams.map((team, index) => (
+                <motion.div
+                  key={team.name}
+                  className={`team-card-${team.color.split('-')[1]} relative`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{team.icon}</span>
+                      <div>
+                        <h3 className="font-bold text-lg">{team.name}</h3>
+                        <p className="text-xs text-synapse-text-muted">{team.model}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">{team.score}</div>
+                      <div className="text-xs text-synapse-text-muted">/100</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-medium text-green-400 mb-1">✅ 강점</h4>
+                      <ul className="text-xs space-y-1">
+                        {team.strengths.map((strength, i) => (
+                          <li key={i} className="text-synapse-text-muted">• {strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-yellow-400 mb-1">⚠️ 주의점</h4>
+                      <ul className="text-xs space-y-1">
+                        {team.concerns.map((concern, i) => (
+                          <li key={i} className="text-synapse-text-muted">• {concern}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* 토론 하이라이트 (접이식) */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <details className="synapse-card" open={showDetails}>
+              <summary 
+                className="cursor-pointer font-bold text-xl flex items-center gap-3 hover:text-synapse-primary transition-colors"
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                <RefreshCw className="w-6 h-6" />
+                토론 하이라이트 보기
+                <span className="text-sm font-normal text-synapse-text-muted">
+                  ({result.highlights.length}개 핵심 포인트)
+                </span>
+              </summary>
+              
+              <div className="mt-6 space-y-4">
+                {result.highlights.map((highlight, index) => (
+                  <div
+                    key={index}
+                    className={
+                      highlight.type === 'flame' ? 'highlight-flame' :
+                      highlight.type === 'insight' ? 'highlight-insight' :
+                      'highlight-defense'
+                    }
+                  >
+                    {highlight.type === 'flame' && <Flame className="w-5 h-5 text-red-500 flex-shrink-0" />}
+                    {highlight.type === 'insight' && <Zap className="w-5 h-5 text-yellow-500 flex-shrink-0" />}
+                    {highlight.type === 'defense' && <Shield className="w-5 h-5 text-green-500 flex-shrink-0" />}
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium">
+                          {highlight.type === 'flame' ? '🔥 결정적 반박' :
+                           highlight.type === 'insight' ? '💡 핵심 통찰' :
+                           '🛡️ 논리적 방어'}
+                        </span>
+                        <span className="text-xs bg-synapse-bg px-2 py-1 rounded">
+                          Round {highlight.round}
+                        </span>
+                      </div>
+                      <p className="text-sm">{highlight.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          </motion.section>
+        </div>
+      </main>
+    </>
+  );
+}
