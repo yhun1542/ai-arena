@@ -1,0 +1,15 @@
+{
+  "title": "AI Arena - AI와 함께하는 토론의 장",
+  "subtitle": "AI와 함께 다양한 주제로 토론해보세요",
+  "searchPlaceholder": "토론하고 싶은 주제를 입력하세요...",
+  "startDiscussion": "토론 시작",
+  "discussionTitle": "AI 응답",
+  "getAiResponse": "AI 응답 받기",
+  "loading": "로딩 중",
+  "error": "오류가 발생했습니다",
+  "networkError": "네트워크 연결을 확인해주세요",
+  "invalidInput": "질문을 입력해주세요",
+  "back": "홈으로 돌아가기",
+  "retry": "다시 시도",
+  "close": "닫기"
+}
