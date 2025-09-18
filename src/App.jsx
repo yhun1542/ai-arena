@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import DiscussionPage from './pages/DiscussionPage.jsx'
@@ -14,6 +15,8 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+
+
 
   const handleStartDiscussion = async () => {
     if (!query.trim()) {
@@ -70,16 +73,27 @@ function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
-      {/* 언어 선택기 */}
-      <div className="absolute top-4 right-4">
-        <LanguageSelector />
-      </div>
+    <>
+      <Helmet>
+        <title>{t('pageTitle')}</title>
+        <meta name="description" content={t('subheadline')} />
+        <meta property="og:title" content={t('pageTitle')} />
+        <meta property="og:description" content={t('subheadline')} />
+        <meta name="twitter:title" content={t('pageTitle')} />
+        <meta name="twitter:description" content={t('subheadline')} />
+      </Helmet>
+      
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        {/* 언어 선택기 */}
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
       
       <main className="flex flex-col justify-center items-center text-center max-w-2xl mx-auto px-4">
         <header className="mb-10">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">AI Arena</h1>
-          <p className="text-xl text-gray-600">{t('subtitle')}</p>
+          <h1 className="text-5xl font-bold text-gray-900 mb-2">AI Arena</h1>
+          <h2 className="headline text-2xl font-semibold text-gray-800 mb-4">{t('headline')}</h2>
+          <p className="text-lg text-gray-600">{t('subheadline')}</p>
         </header>
 
         <div className="w-full max-w-md space-y-4">
@@ -87,7 +101,7 @@ function HomePage() {
             <Input
               id="q"
               type="text"
-              placeholder={t('searchPlaceholder')}
+              placeholder={t('placeholder')}
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value)
@@ -119,35 +133,38 @@ function HomePage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {t('loading')}
+                {t('button_starting')}
               </span>
             ) : (
-              t('startDiscussion')
+              t('button_start')
             )}
           </Button>
         </div>
 
         <div className="mt-12 text-sm text-gray-500">
-          <p>{t('subtitle')}</p>
+          <p>{t('subheadline')}</p>
           {isLoading && (
             <p className="mt-2" role="status" aria-live="polite">
-              {t('loading')}...
+              {t('button_starting')}
             </p>
           )}
         </div>
       </main>
     </div>
+    </>
   )
 }
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/discussion" element={<DiscussionPage />} />
-      </Routes>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/discussion" element={<DiscussionPage />} />
+        </Routes>
+      </Router>
+    </HelmetProvider>
   )
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
 import { Button } from '@/components/ui/button.jsx'
 import LanguageSelector from '../components/LanguageSelector.jsx'
 
@@ -88,11 +89,17 @@ function DiscussionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      {/* 언어 선택기 */}
-      <div className="absolute top-4 right-4">
-        <LanguageSelector />
-      </div>
+    <>
+      <Helmet>
+        <title>{t('discussionTitle')} - {t('pageTitle')}</title>
+        <meta name="description" content={`${t('discussionTitle')} - ${discussionId}`} />
+      </Helmet>
+      
+      <div className="min-h-screen bg-gray-50 py-8">
+        {/* 언어 선택기 */}
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
       
       <div className="max-w-4xl mx-auto px-4">
         {/* 헤더 */}
@@ -176,6 +183,7 @@ function DiscussionPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 
