@@ -1,4 +1,4 @@
-name: Build and Deploy to Vercel
+name: Build and Deploy to Vercel (CLI)
 
 on:
   push:
@@ -16,7 +16,6 @@ jobs:
 
       - name: 2. Setup pnpm
         uses: pnpm/action-setup@v4
-        # package.json에 "packageManager": "pnpm@..." 있으면 version 옵션 제거
 
       - name: 3. Setup Node.js
         uses: actions/setup-node@v4
@@ -30,16 +29,12 @@ jobs:
       - name: 5. Build Project
         run: pnpm run build
 
-      - name: 6. Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # main 브랜치면 --prod 플래그, 아니면 프리뷰 배포
-          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
-          # 자동화 옵션
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-comment: true
-          github-deployment: true
+      - name: 6. Deploy with Vercel CLI
+        run: |
+          npm install -g vercel@latest
+          vercel --token ${{ secrets.VERCEL_TOKEN }} \
+                 --org ${{ secrets.VERCEL_ORG_ID }} \
+                 --project ${{ secrets.VERCEL_PROJECT_ID }} \
+                 ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} \
+                 --confirm
 
