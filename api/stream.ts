@@ -46,6 +46,12 @@ export default async function handler(
       return response.status(405).json({ error: 'Method not allowed' });
     }
 
+    // 사용자 질문 추출
+    const userQuery = request.query.q as string;
+    if (!userQuery) {
+      return response.status(400).json({ error: '질문이 필요합니다.' });
+    }
+
     // 스트리밍 헤더 설정
     response.setHeader('Content-Type', 'text/plain; charset=utf-8');
     response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -59,62 +65,98 @@ export default async function handler(
       reqId: requestId,
       route: '/api/stream',
       method: 'GET',
+      query: userQuery,
       status: 200
     }));
 
-    // 스트리밍 데이터 준비
-    const streamParts = [
-      'AI Arena 스트리밍 데모를 시작합니다...\n\n',
-      '🔄 연결 설정 중...\n',
-      '✅ 연결이 성공적으로 설정되었습니다.\n\n',
-      '📡 데이터 스트리밍 시작...\n',
-      '📊 청크 1/5: 초기화 완료\n',
-      '📊 청크 2/5: 데이터 처리 중\n',
-      '📊 청크 3/5: 응답 생성 중\n',
-      '📊 청크 4/5: 최종 검증 중\n',
-      '📊 청크 5/5: 완료 준비 중\n\n',
-      '🎉 스트리밍이 성공적으로 완료되었습니다!\n',
-      '📝 요청 ID: ' + requestId + '\n',
-      '⏰ 완료 시간: ' + new Date().toISOString() + '\n'
-    ];
+    // OpenAI API 호출
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API 키가 설정되지 않았습니다.');
+    }
 
-    // 스트리밍 실행
-    let chunkCount = 0;
-    for (const part of streamParts) {
-      try {
-        // 연결이 여전히 활성화되어 있는지 확인
-        if (response.destroyed || response.writableEnded) {
-          console.log(JSON.stringify({
-            ts: new Date().toISOString(),
-            level: 'warn',
-            event: 'STREAM_INTERRUPTED',
-            reqId: requestId,
-            route: '/api/stream',
-            chunkCount: chunkCount,
-            totalChunks: streamParts.length
-          }));
-          break;
-        }
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `당신은 AI Arena의 전문 AI 팀입니다. 사용자의 질문에 대해 정확하고 유용한 답변을 제공해주세요. 
+            
+답변 형식:
+- 명확하고 구체적인 정보 제공
+- 근거와 출처가 있는 경우 명시
+- 한국어로 자연스럽게 답변
+- 필요시 단계별 설명 제공
 
-        response.write(part);
-        chunkCount++;
-        
-        // 각 청크 사이에 지연 추가 (실제 스트리밍 시뮬레이션)
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-      } catch (writeError) {
-        console.error(JSON.stringify({
-          ts: new Date().toISOString(),
-          level: 'error',
-          event: 'STREAM_WRITE_ERROR',
-          reqId: requestId,
-          route: '/api/stream',
-          chunkCount: chunkCount,
-          error: writeError instanceof Error ? writeError.message : 'Write error'
-        }));
+질문: "${userQuery}"`
+          },
+          {
+            role: 'user',
+            content: userQuery
+          }
+        ],
+        stream: true,
+        max_tokens: 2000,
+        temperature: 0.7
+      })
+    });
+
+    if (!openaiResponse.ok) {
+      throw new Error(`OpenAI API 오류: ${openaiResponse.status}`);
+    }
+
+    if (!openaiResponse.body) {
+      throw new Error('OpenAI 응답 스트림을 받을 수 없습니다.');
+    }
+
+    // OpenAI 스트림 처리
+    const reader = openaiResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    response.write(`🤖 AI Arena 팀이 "${userQuery}"에 대해 분석 중입니다...\n\n`);
+
+    while (true) {
+      const { value, done } = await reader.read();
+      
+      if (done) {
         break;
       }
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          
+          if (data === '[DONE]') {
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(data);
+            const content = parsed.choices?.[0]?.delta?.content;
+            
+            if (content) {
+              response.write(content);
+            }
+          } catch (parseError) {
+            // JSON 파싱 오류는 무시 (일부 라인은 파싱되지 않을 수 있음)
+            continue;
+          }
+        }
+      }
     }
+
+    response.write(`\n\n---\n📝 요청 ID: ${requestId}\n⏰ 완료 시간: ${new Date().toISOString()}\n`);
     
     // 스트리밍 완료 로깅
     console.log(JSON.stringify({
@@ -124,9 +166,8 @@ export default async function handler(
       reqId: requestId,
       route: '/api/stream',
       method: 'GET',
-      status: 200,
-      totalChunks: chunkCount,
-      expectedChunks: streamParts.length
+      query: userQuery,
+      status: 200
     }));
     
     // 스트리밍 종료
@@ -157,7 +198,7 @@ export default async function handler(
     } else {
       // 스트리밍 중 오류 발생 시 스트림 종료
       if (!response.writableEnded) {
-        response.write('\n\n❌ 스트리밍 중 오류가 발생했습니다.\n');
+        response.write(`\n\n❌ 스트리밍 중 오류가 발생했습니다: ${error?.message || 'Unknown error'}\n`);
         response.end();
       }
     }
