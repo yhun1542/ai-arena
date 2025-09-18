@@ -128,6 +128,60 @@
   resize: none;
 }
 
+.synapse-textarea-enhanced {
+  width: 100%;
+  padding: 1.25rem 5rem 1.25rem 1.5rem;
+  font-family: 'GmarketSans', sans-serif;
+  font-weight: 500;
+  font-size: 1.375rem;
+  background-color: #161B22;
+  border: 1px solid #8B949E;
+  border-radius: 2.25rem;
+  color: #E6EDF3;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: height 0.2s ease-in-out, border-color 0.2s ease;
+}
+
+.synapse-textarea-enhanced::placeholder {
+  color: #8B949E;
+  font-weight: 300;
+}
+
+.synapse-textarea-enhanced:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.synapse-search-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+.synapse-search-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.synapse-search-button:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.95);
+}
+
 .gradient-text {
   background: linear-gradient(to right, #4A90E2, #FF41D5, #4A90E2);
   background-clip: text;

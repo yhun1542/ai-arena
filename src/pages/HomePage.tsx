@@ -112,27 +112,28 @@ export default function HomePage() {
                 <textarea
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="무엇이든 물어보세요. 4개의 최고 AI가 최적의 답변을 찾아드립니다."
-                  className="synapse-textarea text-lg md:text-xl py-6 px-8 pr-16 min-h-[120px] text-center resize-none"
-                  rows={3}
+                  placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
+                  className="synapse-textarea-enhanced text-xl py-6 px-8 pr-20 min-h-[120px] text-center resize-none"
+                  rows={1}
                   disabled={isAnalyzing}
+                  style={{
+                    height: 'auto',
+                    minHeight: '120px'
+                  }}
+                  onInput={(e) => {
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.max(120, e.target.scrollHeight)}px`;
+                  }}
                 />
                 <button
                   type="submit"
                   disabled={!query.trim() || isAnalyzing}
-                  className="absolute bottom-4 right-4 synapse-button-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="synapse-search-button disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? (
-                    <>
-                      <Sparkles className="w-5 h-5 animate-spin" />
-                      분석 중...
-                    </>
+                    <Sparkles className="w-6 h-6 animate-spin" />
                   ) : (
-                    <>
-                      <Search className="w-5 h-5" />
-                      결론 도출
-                      <ArrowRight className="w-4 h-4" />
-                    </>
+                    <Search className="w-6 h-6" />
                   )}
                 </button>
               </div>
