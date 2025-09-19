@@ -10,6 +10,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Synapse v3 CSS 변수 정의 */
+:root {
+  /* Synapse 브랜드 색상 */
+  --synapse-primary: #4A90E2;
+  --synapse-secondary: #FF41D5;
+  --synapse-bg: #0D1117;
+  --synapse-surface: #161B22;
+  --synapse-border: #30363D;
+  --synapse-text: #E6EDF3;
+  --synapse-text-muted: #8B949E;
+  
+  /* 상태 색상 */
+  --synapse-success: #28A745;
+  --synapse-warning: #FFC107;
+  --synapse-error: #DC3545;
+  --synapse-info: #17A2B8;
+  
+  /* AI 팀 색상 */
+  --team-openai: #10A37F;
+  --team-google: #4285F4;
+  --team-anthropic: #D97706;
+  --team-xai: #8B5CF6;
+}
+
 /* 폰트 페이스 정의 */
 @font-face {
   font-family: 'GmarketSans';
