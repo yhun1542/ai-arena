@@ -4,7 +4,7 @@
     "/api/synapse-direct": {
       "maxDuration": 300
     },
-    "/api/synapse-simple": {},
-    "/api/synapse-mega": {}
+    "/api/synapse-mega": {},
+    "/api/synapse-simple": {}
   }
 }
