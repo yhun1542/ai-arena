@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 
@@ -13,8 +13,6 @@ export default function HomePage() {
     
     setIsBusy(true);
     try {
-      // Navigate to results page with query
-      // API 호출 테스트
       const response = await fetch('/api/synapse-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,12 +21,23 @@ export default function HomePage() {
       
       if (response.ok) {
         const result = await response.json();
-        navigate('/synapse/result', { state: { result: result.data, query: query.trim() } });
+        navigate('/synapse/result', { 
+          state: { 
+            result: result.answer, 
+            query: query.trim(),
+            metadata: {
+              timestamp: result.timestamp,
+              processingTime: result.processingTime,
+              model: result.model
+            }
+          } 
+        });
       } else {
-        throw new Error('API 호출 실패');
+        console.error('API 호출 실패:', response.status);
+        setIsBusy(false);
       }
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error('API 오류:', error);
       setIsBusy(false);
     }
   };
@@ -43,10 +52,11 @@ export default function HomePage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="검색어를 입력하세요..."
+              placeholder="최고의 답을 찾기 위한 여정을 시작하세요..."
               className="search-input"
+              disabled={isBusy}
             />
-            <button type="submit" disabled={isBusy} className="search-button">
+            <button type="submit" disabled={isBusy || !query.trim()} className="search-button">
               <Search size={24} />
             </button>
           </form>
@@ -54,99 +64,140 @@ export default function HomePage() {
       </main>
 
       <style jsx global>{`
-        /* Global styles like fonts and colors remain the same */
         @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GmarketSans.css');
+        
         :root {
-          --primary: #4A90E2; --background: #0D1117; --surface: #161B22;
-          --text: #E6EDF3; --text-muted: #8B949E;
+          --primary: #4A90E2;
+          --background: #0D1117;
+          --surface: #161B22;
+          --text: #E6EDF3;
+          --text-muted: #8B949E;
         }
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
         body {
           background-color: var(--background);
           color: var(--text);
           font-family: 'GmarketSans', sans-serif;
+          min-height: 100vh;
         }
 
-        /* Layout Fixes */
         .container {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           min-height: 100vh;
-          padding: 1rem;
-          margin-top: 5vh;
+          padding: 2rem;
         }
+        
         .contentWrapper {
           width: 100%;
-          max-width: 500px;
+          max-width: 600px;
           text-align: center;
         }
+        
         .title {
-          font-size: clamp(4rem, 15vw, 9rem);
+          font-size: clamp(4rem, 12vw, 8rem);
           font-weight: 700;
           background: linear-gradient(135deg, #4A90E2, #9B59B6, #E91E63);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          margin-bottom: 25px;
+          margin-bottom: 3rem;
+          letter-spacing: -0.02em;
         }
         
-        /* 검색창과 아이콘을 함께 묶는 영역 */
         .search-bar {
           position: relative;
           width: 100%;
-          max-width: 500px;
         }
         
-        /* 실제 텍스트를 입력하는 검색창 */
         .search-input {
           width: 100%;
-          height: 50px;
-          padding: 0 60px 0 20px;
+          height: 60px;
+          padding: 0 70px 0 24px;
           border: 2px solid var(--text-muted);
-          border-radius: 25px;
-          font-size: 1rem;
+          border-radius: 30px;
+          font-size: 1.1rem;
           background-color: var(--surface);
           color: var(--text);
-          box-sizing: border-box;
           transition: all 0.3s ease;
+          font-family: 'GmarketSans', sans-serif;
         }
         
-        /* 검색창 호버 및 포커스 효과 */
+        .search-input::placeholder {
+          color: var(--text-muted);
+        }
+        
         .search-input:hover,
         .search-input:focus {
           border-color: var(--primary);
-          box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+          box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
           outline: none;
         }
         
-        /* 돋보기 아이콘 버튼 */
+        .search-input:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+        
         .search-button {
           position: absolute;
-          right: 10px;
+          right: 8px;
           top: 50%;
           transform: translateY(-50%);
-          background: none;
+          width: 44px;
+          height: 44px;
+          background: var(--primary);
           border: none;
+          border-radius: 22px;
           cursor: pointer;
-          padding: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--text-muted);
-          transition: color 0.3s ease;
+          color: white;
+          transition: all 0.3s ease;
         }
         
-        .search-button:hover {
-          color: var(--primary);
+        .search-button:hover:not(:disabled) {
+          background: #357ABD;
+          transform: translateY(-50%) scale(1.05);
         }
         
         .search-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+          transform: translateY(-50%);
+        }
+        
+        @media (max-width: 768px) {
+          .container {
+            padding: 1rem;
+          }
+          
+          .title {
+            margin-bottom: 2rem;
+          }
+          
+          .search-input {
+            height: 50px;
+            font-size: 1rem;
+            padding: 0 60px 0 20px;
+          }
+          
+          .search-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+          }
         }
       `}</style>
     </>
   );
 }
-/* Force rebuild Fri Sep 19 08:57:04 EDT 2025 */
