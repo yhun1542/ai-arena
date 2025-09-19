@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 
@@ -12,38 +12,185 @@ export default function HomePage() {
     if (!query.trim() || isBusy) return;
     
     setIsBusy(true);
+    
     try {
-      const response = await fetch('/api/synapse-simple', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query.trim() })
-      });
+      // 임시로 더미 응답 생성 (API 수정 중)
+      const dummyResult = {
+        answer: `"${query.trim()}"에 대한 답변을 준비 중입니다. AI Arena의 메가 오케스트레이션 시스템이 곧 완성될 예정입니다!`,
+        timestamp: new Date().toISOString(),
+        processingTime: '2.1s',
+        model: 'Synapse v3.0'
+      };
       
-      if (response.ok) {
-        const result = await response.json();
-        navigate('/synapse/result', { 
-          state: { 
-            result: result.answer, 
-            query: query.trim(),
-            metadata: {
-              timestamp: result.timestamp,
-              processingTime: result.processingTime,
-              model: result.model
-            }
-          } 
-        });
-      } else {
-        console.error('API 호출 실패:', response.status);
-        setIsBusy(false);
-      }
+      // 결과 페이지로 이동
+      navigate('/synapse/result', { 
+        state: { 
+          result: dummyResult.answer, 
+          query: query.trim(),
+          metadata: {
+            timestamp: dummyResult.timestamp,
+            processingTime: dummyResult.processingTime,
+            model: dummyResult.model
+          }
+        } 
+      });
     } catch (error) {
-      console.error('API 오류:', error);
+      console.error('처리 오류:', error);
       setIsBusy(false);
     }
   };
 
   return (
     <>
+      <style>{`
+        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GmarketSans.css');
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'GmarketSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+          color: white;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 20px;
+          position: relative;
+        }
+
+        .contentWrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-width: 600px;
+          width: 100%;
+          text-align: center;
+        }
+
+        .title {
+          font-size: 4rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 2rem;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+        }
+
+        .search-bar {
+          position: relative;
+          width: 100%;
+          max-width: 500px;
+          margin-bottom: 2rem;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 16px 60px 16px 20px;
+          font-size: 16px;
+          font-family: 'GmarketSans', sans-serif;
+          background: rgba(255, 255, 255, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50px;
+          color: white;
+          outline: none;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+        }
+
+        .search-input::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:hover,
+        .search-input:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-button {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          color: white;
+        }
+
+        .search-button:hover {
+          transform: translateY(-50%) scale(1.1);
+          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-button:active {
+          transform: translateY(-50%) scale(0.95);
+        }
+
+        .search-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: translateY(-50%);
+        }
+
+        .loading {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+          .title {
+            font-size: 3rem;
+          }
+          
+          .search-input {
+            font-size: 14px;
+            padding: 14px 55px 14px 18px;
+          }
+          
+          .search-button {
+            width: 36px;
+            height: 36px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .title {
+            font-size: 2.5rem;
+          }
+          
+          .contentWrapper {
+            padding: 0 10px;
+          }
+        }
+      `}</style>
+
       <main className="container">
         <div className="contentWrapper">
           <h1 className="title">Synapse</h1>
@@ -56,148 +203,19 @@ export default function HomePage() {
               className="search-input"
               disabled={isBusy}
             />
-            <button type="submit" disabled={isBusy || !query.trim()} className="search-button">
-              <Search size={24} />
+            <button 
+              type="submit" 
+              className="search-button"
+              disabled={isBusy || !query.trim()}
+            >
+              <Search 
+                size={20} 
+                className={isBusy ? 'loading' : ''} 
+              />
             </button>
           </form>
         </div>
       </main>
-
-      <style jsx global>{`
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GmarketSans.css');
-        
-        :root {
-          --primary: #4A90E2;
-          --background: #0D1117;
-          --surface: #161B22;
-          --text: #E6EDF3;
-          --text-muted: #8B949E;
-        }
-        
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          background-color: var(--background);
-          color: var(--text);
-          font-family: 'GmarketSans', sans-serif;
-          min-height: 100vh;
-        }
-
-        .container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-          padding: 2rem;
-        }
-        
-        .contentWrapper {
-          width: 100%;
-          max-width: 600px;
-          text-align: center;
-        }
-        
-        .title {
-          font-size: clamp(4rem, 12vw, 8rem);
-          font-weight: 700;
-          background: linear-gradient(135deg, #4A90E2, #9B59B6, #E91E63);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 3rem;
-          letter-spacing: -0.02em;
-        }
-        
-        .search-bar {
-          position: relative;
-          width: 100%;
-        }
-        
-        .search-input {
-          width: 100%;
-          height: 60px;
-          padding: 0 70px 0 24px;
-          border: 2px solid var(--text-muted);
-          border-radius: 30px;
-          font-size: 1.1rem;
-          background-color: var(--surface);
-          color: var(--text);
-          transition: all 0.3s ease;
-          font-family: 'GmarketSans', sans-serif;
-        }
-        
-        .search-input::placeholder {
-          color: var(--text-muted);
-        }
-        
-        .search-input:hover,
-        .search-input:focus {
-          border-color: var(--primary);
-          box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
-          outline: none;
-        }
-        
-        .search-input:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-        
-        .search-button {
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 44px;
-          height: 44px;
-          background: var(--primary);
-          border: none;
-          border-radius: 22px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          transition: all 0.3s ease;
-        }
-        
-        .search-button:hover:not(:disabled) {
-          background: #357ABD;
-          transform: translateY(-50%) scale(1.05);
-        }
-        
-        .search-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          transform: translateY(-50%);
-        }
-        
-        @media (max-width: 768px) {
-          .container {
-            padding: 1rem;
-          }
-          
-          .title {
-            margin-bottom: 2rem;
-          }
-          
-          .search-input {
-            height: 50px;
-            font-size: 1rem;
-            padding: 0 60px 0 20px;
-          }
-          
-          .search-button {
-            width: 36px;
-            height: 36px;
-            border-radius: 18px;
-          }
-        }
-      `}</style>
     </>
   );
 }
