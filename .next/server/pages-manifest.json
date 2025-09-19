@@ -1,7 +1,7 @@
 {
   "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/": "pages/index.html",
+  "/_error": "pages/_error.js",
   "/synapse/result": "pages/synapse/result.html",
   "/api/synapse-simple": "pages/api/synapse-simple.js",
   "/api/synapse-direct": "pages/api/synapse-direct.js",

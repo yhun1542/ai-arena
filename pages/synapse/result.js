@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
 
-export default function SynapseResult() {
+export default function SynapseResultPage() {
   const router = useRouter();
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // sessionStorage에서 결과 데이터 가져오기
-    const storedResult = sessionStorage.getItem('synapseResult');
-    if (storedResult) {
+    const data = sessionStorage.getItem('synapseResult');
+    if (data) {
       try {
-        const data = JSON.parse(storedResult);
-        setResultData(data);
+        const parsed = JSON.parse(data);
+        setResultData(parsed);
       } catch (error) {
         console.error('결과 데이터 파싱 오류:', error);
       }
@@ -20,195 +20,345 @@ export default function SynapseResult() {
     setLoading(false);
   }, []);
 
-  const handleBackToHome = () => {
+  const handleNewSearch = () => {
     router.push('/');
   };
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Arial, sans-serif'
-      }}>
-        <div>로딩 중...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">로딩 중...</div>
       </div>
     );
   }
 
   if (!resultData) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Arial, sans-serif',
-        padding: '2rem'
-      }}>
-        <h1 style={{ marginBottom: '2rem' }}>결과를 찾을 수 없습니다</h1>
-        <button 
-          onClick={handleBackToHome}
-          style={{
-            padding: '1rem 2rem',
-            background: 'linear-gradient(45deg, #00d4ff, #4ecdc4)',
-            border: 'none',
-            borderRadius: '50px',
-            color: 'white',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}
-        >
-          홈으로 돌아가기
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl mb-4">결과를 찾을 수 없습니다</h2>
+          <button 
+            onClick={handleNewSearch}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            새 검색하기
+          </button>
+        </div>
       </div>
     );
   }
 
   const { query, result, timestamp } = resultData;
+  const responses = result?.data?.responses || result?.responses || [];
+  const orchestration = result?.data?.orchestration || result?.orchestration || {};
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-      color: 'white',
-      fontFamily: 'Arial, sans-serif',
-      padding: '2rem'
-    }}>
-      {/* 헤더 */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        padding: '0 1rem'
-      }}>
-        <h1 style={{
-          fontSize: '2rem',
-          background: 'linear-gradient(45deg, #00d4ff, #ff6b6b, #4ecdc4)',
-          backgroundSize: '200% 200%',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          Synapse 결과
-        </h1>
-        <button 
-          onClick={handleBackToHome}
-          style={{
-            padding: '0.5rem 1rem',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '25px',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '0.9rem'
-          }}
-        >
-          새 검색
-        </button>
-      </div>
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GmarketSans.css');
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
 
-      {/* 질문 */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '1.5rem',
-        borderRadius: '15px',
-        marginBottom: '2rem',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
-      }}>
-        <h3 style={{ marginBottom: '0.5rem', color: '#00d4ff' }}>질문</h3>
-        <p style={{ fontSize: '1.1rem', lineHeight: '1.5' }}>{query}</p>
-      </div>
+          body {
+            font-family: 'GmarketSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+          }
 
-      {/* 결과 */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '1.5rem',
-        borderRadius: '15px',
-        marginBottom: '2rem',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
-      }}>
-        <h3 style={{ marginBottom: '1rem', color: '#4ecdc4' }}>AI 응답</h3>
-        
-        {result && result.orchestration ? (
-          <div>
-            {/* 오케스트레이션 결과 */}
-            {result.orchestration.answer && (
-              <div style={{
-                background: 'rgba(0, 212, 255, 0.1)',
-                padding: '1rem',
-                borderRadius: '10px',
-                marginBottom: '1rem',
-                border: '1px solid rgba(0, 212, 255, 0.3)'
-              }}>
-                <h4 style={{ color: '#00d4ff', marginBottom: '0.5rem' }}>통합 답변</h4>
-                <p style={{ lineHeight: '1.6' }}>{result.orchestration.answer}</p>
-              </div>
-            )}
+          .container {
+            min-height: 100vh;
+            padding: 20px;
+          }
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+
+          .new-search-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+
+          .new-search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+          }
+
+          .query-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .query-title {
+            font-size: 1.2rem;
+            color: #64b5f6;
+            margin-bottom: 15px;
+            font-weight: 600;
+          }
+
+          .query-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+          }
+
+          .responses-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+
+          .response-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+          }
+
+          .response-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          }
+
+          .model-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+          }
+
+          .model-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+
+          .model-icon {
+            font-size: 1.5rem;
+          }
+
+          .model-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+          }
+
+          .model-provider {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+          }
+
+          .score-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+          }
+
+          .error-badge {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          }
+
+          .response-content {
+            line-height: 1.6;
+            margin-bottom: 15px;
+          }
+
+          .response-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+          }
+
+          .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+          }
+
+          .summary-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .summary-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #f093fb;
+            font-weight: 600;
+          }
+
+          .processing-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+          }
+
+          .info-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+          }
+
+          .info-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+          }
+
+          .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+
+          @media (max-width: 768px) {
+            .header {
+              flex-direction: column;
+              gap: 15px;
+              text-align: center;
+            }
             
-            {/* 개별 모델 응답 */}
-            {result.responses && result.responses.length > 0 && (
-              <div>
-                <h4 style={{ marginBottom: '1rem', color: '#ff6b6b' }}>모델별 응답</h4>
-                {result.responses.map((response, index) => (
-                  <div key={index} style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    padding: '1rem',
-                    borderRadius: '10px',
-                    marginBottom: '1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}>
-                    <h5 style={{ 
-                      color: '#4ecdc4', 
-                      marginBottom: '0.5rem',
-                      fontSize: '0.9rem'
-                    }}>
-                      {response.model || `모델 ${index + 1}`}
-                    </h5>
-                    <p style={{ 
-                      lineHeight: '1.5',
-                      fontSize: '0.95rem'
-                    }}>
-                      {response.content || response.answer || '응답 없음'}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div style={{
-            background: 'rgba(255, 107, 107, 0.1)',
-            padding: '1rem',
-            borderRadius: '10px',
-            border: '1px solid rgba(255, 107, 107, 0.3)'
-          }}>
-            <p>응답을 처리하는 중 오류가 발생했습니다.</p>
-            <p style={{ fontSize: '0.9rem', opacity: 0.8, marginTop: '0.5rem' }}>
-              {JSON.stringify(result, null, 2)}
-            </p>
-          </div>
-        )}
-      </div>
+            .title {
+              font-size: 1.5rem;
+            }
+            
+            .processing-info {
+              grid-template-columns: 1fr;
+            }
+          }
+        `
+      }} />
 
-      {/* 메타데이터 */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        padding: '1rem',
-        borderRadius: '10px',
-        fontSize: '0.9rem',
-        opacity: 0.8
-      }}>
-        <p>처리 시간: {new Date(timestamp).toLocaleString('ko-KR')}</p>
+      <div className="container">
+        <div className="header">
+          <h1 className="title">Synapse 결과</h1>
+          <button onClick={handleNewSearch} className="new-search-btn">
+            <ArrowLeft size={20} />
+            새 검색
+          </button>
+        </div>
+
+        <div className="query-section">
+          <div className="query-title">질문</div>
+          <div className="query-text">{query}</div>
+        </div>
+
+        <div className="responses-grid">
+          {responses.map((item, index) => {
+            const model = item.model || {};
+            const response = item.response || {};
+            const isError = response.content?.includes('오류') || response.content?.includes('실패') || response.score === 0;
+            
+            return (
+              <div key={index} className="response-card">
+                <div className="model-header">
+                  <div className="model-info">
+                    <span className="model-icon">{model.icon || '🤖'}</span>
+                    <div>
+                      <div className="model-name">{model.name || '알 수 없음'}</div>
+                      <div className="model-provider">{model.provider || ''}</div>
+                    </div>
+                  </div>
+                  <div className={`score-badge ${isError ? 'error-badge' : ''}`}>
+                    {isError ? (
+                      <>
+                        <AlertCircle size={16} />
+                        오류
+                      </>
+                    ) : (
+                      <>
+                        <Award size={16} />
+                        {response.score || 0}점
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="response-content">
+                  {response.content || '응답 없음'}
+                </div>
+                
+                <div className="response-meta">
+                  <div className="meta-item">
+                    <Clock size={14} />
+                    {response.processingTime || 0}ms
+                  </div>
+                  <div className="meta-item">
+                    신뢰도: {response.confidence || 0}%
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="summary-section">
+          <div className="summary-title">처리 요약</div>
+          <div className="processing-info">
+            <div className="info-item">
+              <div className="info-label">처리 시간</div>
+              <div className="info-value">{orchestration.processingTime || '알 수 없음'}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">성공한 응답</div>
+              <div className="info-value">{orchestration.successfulResponses || 0}개</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">평균 점수</div>
+              <div className="info-value">{orchestration.averageScore || 0}점</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">처리 시각</div>
+              <div className="info-value">
+                {timestamp ? new Date(timestamp).toLocaleString('ko-KR') : '알 수 없음'}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
