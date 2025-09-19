@@ -1,8 +1,7 @@
 {
   "functions": {
     "pages/api/**/*.ts": {
-      "runtime": "@vercel/node@20",
-      "maxDuration": 300
+      "runtime": "@vercel/node@20"
     }
   },
   "rewrites": [
@@ -10,37 +9,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "headers": [
-    {
-      "source": "/fonts/(.*\\.woff2?)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "font/woff2"
-        }
-      ]
-    },
-    {
-      "source": "/fonts/(.*\\.ttf)",
-      "headers": [
-        {
-          "key": "Content-Type", 
-          "value": "font/ttf"
-        }
-      ]
-    },
-    {
-      "source": "/fonts/(.*\\.otf)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "font/otf"
-        }
-      ]
-    }
-  ],
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
-  "installCommand": "pnpm install"
+  ]
 }
