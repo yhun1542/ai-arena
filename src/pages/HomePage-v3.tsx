@@ -58,11 +58,7 @@ export default function HomePage() {
 
       <style jsx global>{`
         /* Global styles like fonts and colors remain the same */
-        @font-face {
-          font-family: 'GmarketSans';
-          font-weight: 700;
-          src: url('/fonts/GmarketSansBold.otf') format('opentype');
-        }
+        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GmarketSans.css');
         :root {
           --primary: #4A90E2; --background: #0D1117; --surface: #161B22;
           --text: #E6EDF3; --text-muted: #8B949E;
