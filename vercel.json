@@ -1,7 +1,8 @@
 {
   "version": 3,
   "functions": {
-    "api/**/*": {
+    "pages/api/**/*.ts": {
+      "runtime": "@vercel/node@20",
       "maxDuration": 60
     }
   },
