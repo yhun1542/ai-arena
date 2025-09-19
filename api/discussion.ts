@@ -1,9 +1,7 @@
-// api/discussion.ts
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { v4 as uuidv4 } from 'uuid';
 
-export default function handler(
+export default async function handler(
   request: VercelRequest,
   response: VercelResponse,
 ) {
@@ -11,7 +9,7 @@ export default function handler(
   const requestId = uuidv4();
   response.setHeader('x-request-id', requestId);
   response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // OPTIONS 요청 처리 (CORS preflight)
@@ -19,69 +17,125 @@ export default function handler(
     return response.status(200).end();
   }
 
-  if (request.method !== 'GET') {
-    response.setHeader('Allow', 'GET');
-    return response.status(405).end();
-  }
-
   try {
-    // 쿼리 파라미터에서 토론 ID 추출
-    const { id } = request.query;
-    
-    if (!id || typeof id !== 'string') {
-      return response.status(400).json({ 
-        error: 'Missing discussion ID',
-        message: 'Discussion ID is required as query parameter' 
-      });
-    }
-
-    // UUID 형식 검증 (간단한 체크)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      return response.status(400).json({ 
-        error: 'Invalid discussion ID format',
-        message: 'Discussion ID must be a valid UUID' 
-      });
-    }
-
-    // 로깅
-    console.log(JSON.stringify({
-      ts: new Date().toISOString(),
-      level: 'info',
-      event: 'DISCUSSION_RETRIEVED',
-      reqId: requestId,
-      route: '/api/discussion',
-      method: 'GET',
-      status: 200,
-      discussionId: id
-    }));
-
-    // 토론 정보 반환 (실제로는 데이터베이스에서 조회)
-    return response.status(200).json({
-      discussionId: id,
-      status: 'active',
-      title: '토론이 시작되었습니다',
-      createdAt: new Date().toISOString(),
-      participants: ['AI Assistant', 'Human User'],
-      message: 'AI 응답 받기 버튼을 클릭하여 스트리밍을 시작하세요.'
+    console.log(`🚀 Discussion API 요청: ${request.method}`, {
+      requestId,
+      query: request.query,
+      timestamp: new Date().toISOString()
     });
 
-  } catch (error) {
-    // 오류 로깅
-    console.error(JSON.stringify({
-      ts: new Date().toISOString(),
-      level: 'error',
-      event: 'DISCUSSION_RETRIEVE_FAILED',
-      reqId: requestId,
-      route: '/api/discussion',
-      method: 'GET',
-      status: 500,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }));
+    if (request.method === 'GET') {
+      // GET 요청 - 토론 데이터 조회
+      const { id } = request.query;
+      
+      if (!id || typeof id !== 'string') {
+        return response.status(400).json({ 
+          error: 'Bad Request',
+          message: 'Discussion ID is required',
+          requestId
+        });
+      }
 
-    return response.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Failed to retrieve discussion' 
+      // 토론 데이터 조회 (모의 데이터)
+      const discussionData = {
+        id: id,
+        title: `AI 협업 토론: ${id}`,
+        participants: [
+          { name: 'GPT-4o', role: 'analyst', color: '#10B981', icon: '🤖' },
+          { name: 'Claude', role: 'critic', color: '#8B5CF6', icon: '🧠' },
+          { name: 'Gemini', role: 'synthesizer', color: '#3B82F6', icon: '💎' },
+          { name: 'Grok', role: 'pragmatist', color: '#F59E0B', icon: '⚡' }
+        ],
+        messages: [
+          {
+            id: uuidv4(),
+            participant: 'GPT-4o',
+            content: '이 주제에 대한 체계적이고 종합적인 분석을 시작하겠습니다.',
+            timestamp: new Date().toISOString(),
+            type: 'analysis'
+          },
+          {
+            id: uuidv4(),
+            participant: 'Claude',
+            content: '논리적 구조와 윤리적 측면을 검토하여 균형잡힌 관점을 제공하겠습니다.',
+            timestamp: new Date().toISOString(),
+            type: 'critique'
+          },
+          {
+            id: uuidv4(),
+            participant: 'Gemini',
+            content: '창의적이고 혁신적인 접근법으로 새로운 관점을 제시하겠습니다.',
+            timestamp: new Date().toISOString(),
+            type: 'innovation'
+          },
+          {
+            id: uuidv4(),
+            participant: 'Grok',
+            content: '실용적이고 현실적인 관점에서 직설적인 분석을 제공하겠습니다.',
+            timestamp: new Date().toISOString(),
+            type: 'practical'
+          }
+        ],
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        requestId
+      };
+
+      console.log(`✅ Discussion 데이터 반환: ${id}`);
+      return response.status(200).json({
+        success: true,
+        data: discussionData,
+        requestId
+      });
+
+    } else if (request.method === 'POST') {
+      // POST 요청 - 새로운 토론 생성
+      const { query, topic } = request.body;
+      
+      if (!query || typeof query !== 'string') {
+        return response.status(400).json({
+          error: 'Bad Request',
+          message: 'Query is required for creating discussion',
+          requestId
+        });
+      }
+
+      const newDiscussionId = uuidv4();
+      const discussionData = {
+        id: newDiscussionId,
+        query: query,
+        topic: topic || 'General Discussion',
+        status: 'created',
+        createdAt: new Date().toISOString(),
+        requestId
+      };
+
+      console.log(`✅ Discussion 생성: ${newDiscussionId}`);
+      return response.status(201).json({
+        success: true,
+        data: discussionData,
+        requestId
+      });
+
+    } else {
+      // 지원하지 않는 HTTP 메서드
+      response.setHeader('Allow', 'GET, POST, OPTIONS');
+      return response.status(405).json({
+        error: 'Method Not Allowed',
+        message: 'Only GET and POST methods are supported',
+        requestId
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Discussion API 오류:', error);
+    
+    // 중요: 오류 발생 시에도 반드시 응답을 반환
+    return response.status(500).json({
+      error: 'Internal Server Error',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      requestId,
+      timestamp: new Date().toISOString()
     });
   }
 }
