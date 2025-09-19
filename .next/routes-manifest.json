@@ -25,6 +25,12 @@
       "regex": "^/(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/synapse/result",
+      "regex": "^/synapse/result(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/synapse/result(?:/)?$"
     }
   ],
   "dataRoutes": [],

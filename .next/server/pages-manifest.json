@@ -2,6 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/": "pages/index.html",
+  "/synapse/result": "pages/synapse/result.html",
   "/api/synapse-direct": "pages/api/synapse-direct.js",
   "/api/synapse-simple": "pages/api/synapse-simple.js",
   "/api/synapse-mega": "pages/api/synapse-mega.js",
