@@ -172,7 +172,7 @@ async function callGemini(prompt: string, model: string): Promise<AIResponse> {
   
   try {
     const modelName = model.includes('gemini') ? model : 'gemini-1.5-pro';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
     const response = await fetch(url, {
       method: 'POST',
@@ -856,7 +856,7 @@ export default async function handler(
     }
 
     // 환경 변수 확인
-    const requiredEnvVars = ['OPENAI_API_KEY', 'GOOGLE_GENERATIVE_AI_API_KEY', 'ANTHROPIC_API_KEY', 'XAI_API_KEY'];
+    const requiredEnvVars = ['OPENAI_API_KEY', 'GOOGLE_API_KEY', 'ANTHROPIC_API_KEY', 'XAI_API_KEY'];
     const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
     
     if (missingEnvVars.length > 0) {
