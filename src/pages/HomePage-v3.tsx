@@ -32,7 +32,7 @@ export default function HomePage() {
     try {
       console.log('🚀 Synapse 요청 시작:', query);
       
-      const response = await fetch('/api/synapse-v6', {
+      const response = await fetch('/api/synapse-mega', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function HomePage() {
           <div className="flex items-center gap-4 text-sm text-synapse-text-muted">
             <span>v3.0</span>
             <span>•</span>
-            <span>4개 AI 협업</span>
+            <span>8개 AI 협업</span>
           </div>
         </nav>
       </header>
@@ -113,10 +113,10 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-synapse-text-muted mb-4">
-              하나의 질문, 네 개의 지성, 최고의 결론.
+              하나의 질문, 여덟 개의 지성, 최고의 결론.
             </p>
             <p className="text-lg text-synapse-text-muted max-w-2xl mx-auto">
-              GPT-4o, Gemini, Claude, Grok이 협업하여<br />
+              GPT-4o, Gemini Pro, Claude, Grok, Mistral, Cohere, Llama, Perplexity가 협업하여<br />
               세상에서 가장 정확하고 실행 가능한 답변을 만들어냅니다.
             </p>
           </motion.div>
@@ -214,9 +214,9 @@ export default function HomePage() {
           >
             <div className="text-center p-6">
               <Users className="w-12 h-12 text-synapse-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-synapse-text mb-2">4개 AI 협업</h3>
+              <h3 className="text-xl font-bold text-synapse-text mb-2">8개 AI 협업</h3>
               <p className="text-synapse-text-muted">
-                GPT-4o, Gemini, Claude, Grok이<br />
+                GPT-4o, Gemini Pro, Claude, Grok, Mistral, Cohere, Llama, Perplexity가<br />
                 각자의 강점을 결합합니다
               </p>
             </div>
@@ -248,7 +248,7 @@ export default function HomePage() {
         <div className="text-center text-sm text-synapse-text-muted">
           <p>© 2025 Synapse. 최고의 AI 협업 플랫폼.</p>
           <p className="mt-2">
-            Powered by OpenAI GPT-4o, Google Gemini, Anthropic Claude, xAI Grok
+            Powered by OpenAI GPT-4o, Google Gemini Pro, Anthropic Claude, xAI Grok, Mistral Large, Cohere Command R+, Meta Llama 3.1, Perplexity AI
           </p>
         </div>
       </footer>
