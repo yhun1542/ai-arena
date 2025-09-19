@@ -87,12 +87,75 @@ pnpm run test:ci
 /execute deployment --run-id latest --approver @ManusAI
 ```
 
+## 🔍 자동화 점검 스크립트
+
+### 1. 뷰포트 점검 스크립트 🔍
+
+화면 깨짐 방지를 위한 뷰포트 meta 태그 점검
+
+```bash
+# 기본 점검
+pnpm run check:viewport
+
+# 자동 수정
+pnpm run check:viewport:fix
+
+# 또는 직접 실행
+node scripts/checkViewport.cjs
+node scripts/checkViewport.cjs --fix
+node scripts/checkViewport.cjs --build
+```
+
+**기능:**
+- ✅ `index.html` 뷰포트 태그 확인
+- ✅ 빌드된 파일들(`dist/`) 자동 스캔
+- ✅ 다양한 허용 가능한 뷰포트 형식 지원
+- ✅ 자동 수정 기능
+- ✅ 컬러풀한 결과 출력
+
+### 2. API 연결 상태 점검 스크립트 🔗
+
+시스템 전반의 연결 상태와 API 작동 여부 점검
+
+```bash
+# 전체 점검
+pnpm run check:api
+
+# 빠른 점검 (API 제외)
+pnpm run check:api:quick
+
+# 또는 직접 실행
+node scripts/checkAPI.cjs
+node scripts/checkAPI.cjs --skip-api
+node scripts/checkAPI.cjs --skip-website
+node scripts/checkAPI.cjs --skip-network
+node scripts/checkAPI.cjs --save-json
+```
+
+**기능:**
+- ✅ 네트워크 연결 상태 확인
+- ✅ 환경 변수 설정 상태 점검
+- ✅ 웹사이트 접근성 테스트
+- ✅ AI API 엔드포인트 테스트
+- ✅ 응답 시간 측정
+- ✅ JSON 결과 저장 옵션
+
+### 3. 통합 점검
+
+```bash
+# 모든 점검 실행
+pnpm run check:all
+```
+
 ## 현재 구현된 기능
 
 - ✅ 홈페이지 UI (검색창 + 토론 시작 버튼)
 - ✅ 반응형 디자인
 - ✅ GitHub Actions CI/CD 설정
 - ✅ Slack 알림 통합
+- ✅ **Synapse v2 AI 오케스트레이션 시스템**
+- ✅ **4개 AI 모델 협업** (GPT-4o, Gemini, Claude, Grok)
+- ✅ **자동화 점검 스크립트** (뷰포트, API 연결)
 
 ## 향후 개발 계획
 
