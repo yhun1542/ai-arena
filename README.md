@@ -8,11 +8,16 @@ AI Arena는 사용자가 AI와 함께 다양한 주제로 토론할 수 있는 �
 
 ## 기술 스택
 
-- **Frontend**: React 19, Vite, Tailwind CSS
-- **UI Components**: shadcn/ui, Radix UI
+- **Frontend**: React 18.3.1, TypeScript 5.6.2, Vite 6.0.1
+- **UI Components**: shadcn/ui, Radix UI, Tailwind CSS 3.4.15
+- **AI Integration**: @ai-sdk (OpenAI, Anthropic, Google)
+- **Routing**: React Router DOM 7.0.2
+- **Animation**: Framer Motion 12.23.15
+- **Forms**: React Hook Form 7.54.0
+- **Package Manager**: pnpm 9.12.1
 - **CI/CD**: GitHub Actions
-- **배포**: Vercel
-- **알림**: Slack 통합
+- **배포**: Vercel (Node.js 20.x)
+- **도메인**: jasoneye.com
 
 ## 프로젝트 구조
 
