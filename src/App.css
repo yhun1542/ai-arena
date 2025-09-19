@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./styles/mobile.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,9 +123,117 @@
 
 /* 모바일 대응 스타일 */
 @media (max-width: 768px) {
-  /* 모바일용 스타일을 여기에 추가하세요 */
+  .container {
+    @apply px-4;
+  }
+  
+  h1 {
+    @apply text-4xl;
+  }
+  
+  .text-xl {
+    @apply text-lg;
+  }
+  
+  .text-2xl {
+    @apply text-xl;
+  }
+  
+  .py-12 {
+    @apply py-8;
+  }
+  
+  .py-8 {
+    @apply py-6;
+  }
+  
+  .mb-16 {
+    @apply mb-12;
+  }
+  
+  .mb-12 {
+    @apply mb-8;
+  }
+  
+  /* 텍스트 영역 모바일 최적화 */
+  textarea {
+    @apply h-24 text-base p-4;
+  }
+  
+  /* 버튼 모바일 최적화 */
+  button {
+    @apply text-sm px-4 py-2;
+  }
+  
+  /* 그리드 레이아웃 모바일 최적화 */
+  .grid {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  /* 플렉스 레이아웃 모바일 최적화 */
+  .flex {
+    @apply flex-col;
+  }
+  
+  .flex.items-center {
+    @apply items-start;
+  }
+  
+  /* 네비게이션 모바일 최적화 */
+  nav .flex {
+    @apply flex-row items-center;
+  }
 }
 
 @media (max-width: 480px) {
-  /* 작은 모바일용 스타일을 여기에 추가하세요 */
+  .container {
+    @apply px-3;
+  }
+  
+  h1 {
+    @apply text-3xl;
+  }
+  
+  .text-lg {
+    @apply text-base;
+  }
+  
+  .py-6 {
+    @apply py-4;
+  }
+  
+  .mb-8 {
+    @apply mb-6;
+  }
+  
+  /* 매우 작은 화면용 최적화 */
+  textarea {
+    @apply h-20 text-sm p-3;
+  }
+  
+  button {
+    @apply text-xs px-3 py-1.5;
+  }
+  
+  /* 아이콘 크기 조정 */
+  .w-8 {
+    @apply w-6;
+  }
+  
+  .h-8 {
+    @apply h-6;
+  }
+  
+  /* 간격 조정 */
+  .gap-6 {
+    @apply gap-4;
+  }
+  
+  .gap-4 {
+    @apply gap-3;
+  }
+  
+  .gap-3 {
+    @apply gap-2;
+  }
 }
