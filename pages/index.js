@@ -47,20 +47,34 @@ export default function HomePage() {
       console.error('검색 오류:', error);
       // 오류 발생 시 더미 응답으로 대체
       const dummyResult = {
-        answer: `"${query.trim()}"에 대한 답변을 준비 중입니다. AI Arena의 메가 오케스트레이션 시스템이 곧 완성될 예정입니다!`,
-        timestamp: new Date().toISOString(),
-        processingTime: '2.1s',
-        model: 'Synapse v3.0'
+        orchestration: {
+          answer: `"${query.trim()}"에 대한 답변을 준비 중입니다. AI Arena의 메가 오케스트레이션 시스템이 곧 완성될 예정입니다!`,
+          processingTime: '2.1s',
+          model: 'Synapse v3.0'
+        },
+        responses: [
+          {
+            model: 'GPT-4o',
+            content: `GPT-4o가 "${query.trim()}"에 대해 분석 중입니다...`,
+            score: 85
+          },
+          {
+            model: 'Gemini 2.0',
+            content: `Gemini 2.0이 "${query.trim()}"에 대해 처리 중입니다...`,
+            score: 88
+          },
+          {
+            model: 'Claude 3.5',
+            content: `Claude 3.5가 "${query.trim()}"에 대해 응답 중입니다...`,
+            score: 92
+          }
+        ]
       };
       
       sessionStorage.setItem('synapseResult', JSON.stringify({
-        result: dummyResult.answer, 
         query: query.trim(),
-        metadata: {
-          timestamp: dummyResult.timestamp,
-          processingTime: dummyResult.processingTime,
-          model: dummyResult.model
-        }
+        result: dummyResult,
+        timestamp: new Date().toISOString()
       }));
       router.push('/synapse/result');
     }
@@ -79,7 +93,7 @@ export default function HomePage() {
           box-sizing: border-box;
         }
 
-        body {
+        html, body {
           font-family: 'GmarketSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
           color: white;
@@ -101,34 +115,36 @@ export default function HomePage() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          max-width: 600px;
+          max-width: 800px;
           width: 100%;
           text-align: center;
         }
 
         .title {
-          font-size: 4rem;
+          font-size: 5rem;
           font-weight: 700;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
           background-clip: text;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          margin-bottom: 2rem;
+          margin-bottom: 3rem;
           letter-spacing: -0.02em;
           line-height: 1.1;
         }
 
+
+
         .search-bar {
           position: relative;
           width: 100%;
-          max-width: 500px;
+          max-width: 600px;
           margin-bottom: 2rem;
         }
 
         .search-input {
           width: 100%;
-          padding: 16px 60px 16px 20px;
-          font-size: 16px;
+          padding: 20px 70px 20px 25px;
+          font-size: 18px;
           font-family: 'GmarketSans', sans-serif;
           background: rgba(255, 255, 255, 0.1);
           border: 2px solid rgba(255, 255, 255, 0.2);
@@ -152,11 +168,11 @@ export default function HomePage() {
 
         .search-button {
           position: absolute;
-          right: 8px;
+          right: 10px;
           top: 50%;
           transform: translateY(-50%);
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           border: none;
           border-radius: 50%;
@@ -194,24 +210,28 @@ export default function HomePage() {
 
         @media (max-width: 768px) {
           .title {
-            font-size: 3rem;
+            font-size: 4rem;
           }
           
+
+          
           .search-input {
-            font-size: 14px;
-            padding: 14px 55px 14px 18px;
+            font-size: 16px;
+            padding: 18px 65px 18px 22px;
           }
           
           .search-button {
-            width: 36px;
-            height: 36px;
+            width: 45px;
+            height: 45px;
           }
         }
 
         @media (max-width: 480px) {
           .title {
-            font-size: 2.5rem;
+            font-size: 3rem;
           }
+          
+
           
           .contentWrapper {
             padding: 0 10px;
@@ -237,7 +257,7 @@ export default function HomePage() {
               disabled={isBusy || !query.trim()}
             >
               <Search 
-                size={20} 
+                size={24} 
                 className={isBusy ? 'loading' : ''} 
               />
             </button>
