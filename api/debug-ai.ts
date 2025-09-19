@@ -160,7 +160,7 @@ export default async function handler(
               'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
             },
             body: JSON.stringify({
-              model: 'grok-3',
+              model: 'grok-4-0709',
               messages: [{ role: 'user', content: testPrompt }],
               max_tokens: 50,
             }),

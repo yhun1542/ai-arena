@@ -96,14 +96,14 @@ const STANDARD_MODELS = {
   openai: 'gpt-4o',
   google: 'gemini-1.5-flash',
   anthropic: 'claude-sonnet-4-20250514',
-  xai: 'grok-3',
+  xai: 'grok-4-0709',
 };
 
 const ADVANCED_MODELS = {
   openai: 'gpt-4o', // 현재 최고 모델
    google: 'gemini-1.5-pro', // 더 강력한 모델드
   anthropic: 'claude-sonnet-4-20250514',
-  xai: 'grok-3', // 최신 Grok 모델
+  xa  xai: 'grok-4-0709', // 최신 Grok 모델델
 };
 
 const TEAM_INFO = {
