@@ -482,3 +482,4 @@ export default async function handler(
   }
 }
 // 마지막에 있던 불필요한 괄호 제거
+# 강제 재배포 트리거 Fri Sep 19 00:31:31 EDT 2025
