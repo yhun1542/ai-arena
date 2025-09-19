@@ -102,7 +102,7 @@ export default function SynapseResultPage() {
   const [showDetails, setShowDetails] = useState(false);
   
   // 라우터 state에서 결과 데이터 가져오기
-  const { result, query, useAdvanced } = location.state as {
+  const { result, query } = (location.state || {}) as {
     result: SynapseResult;
     query: string;
     useAdvanced: boolean;
