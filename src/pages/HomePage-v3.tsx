@@ -48,7 +48,6 @@ export default function HomePage() {
       <main className="container">
         <div className="content-wrapper">
           <h1 className="title">Synapse</h1>
-          <p className="subtitle">v3.0에게 AI 협업</p>
           <form onSubmit={handleSubmit}>
             <textarea
               ref={textareaRef}
@@ -58,13 +57,7 @@ export default function HomePage() {
               placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
               className="search-input"
               rows={1}
-              disabled={isBusy}
             />
-            {isBusy && (
-              <div className="loading-indicator">
-                <div className="spinner"></div>
-              </div>
-            )}
           </form>
         </div>
       </main>
@@ -82,169 +75,60 @@ export default function HomePage() {
         }
 
         :root {
-          --primary: #4A90E2;
-          --background: #0D1117;
+          --primary: #4A90E2; 
+          --background: #0D1117; 
           --surface: #161B22;
-          --text: #E6EDF3;
+          --text: #E6EDF3; 
           --text-muted: #8B949E;
-          --border: #30363D;
         }
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
+        
         body {
           background-color: var(--background);
           color: var(--text);
-          font-family: 'GmarketSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          line-height: 1.6;
-          overflow-x: hidden;
-        }
-
-        .container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-          padding: 1rem;
-          background: linear-gradient(135deg, var(--background) 0%, #1a1f2e 100%);
-        }
-
-        .content-wrapper {
-          width: 100%;
-          max-width: 800px;
-          text-align: center;
-        }
-
-        .title {
-          font-size: clamp(4rem, 15vw, 9rem);
-          font-weight: 700;
-          color: var(--text-muted);
-          margin-bottom: 1rem;
-          letter-spacing: -0.02em;
-          background: linear-gradient(135deg, var(--text-muted), var(--primary));
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          text-shadow: 0 0 30px rgba(74, 144, 226, 0.3);
-        }
-
-        .subtitle {
-          font-size: clamp(1rem, 3vw, 1.5rem);
-          font-weight: 500;
-          color: var(--text-muted);
-          margin-bottom: 2.5rem;
-          opacity: 0.8;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 1.25rem 1.5rem;
-          font-size: clamp(1.25rem, 4vw, 2rem);
-          font-weight: 500;
           font-family: 'GmarketSans', sans-serif;
-          text-align: center;
-          background-color: var(--surface);
-          border: 2px solid var(--border);
-          border-radius: 1.5rem;
-          color: var(--text);
-          resize: none;
-          overflow: hidden;
-          line-height: 1.6;
-          box-sizing: border-box;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-
-        .search-input:focus {
-          outline: none;
-          border-color: var(--primary);
-          box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2), 0 8px 30px rgba(0, 0, 0, 0.4);
-          transform: translateY(-2px);
-        }
-
-        .search-input:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-
-        .search-input::placeholder {
-          color: var(--text-muted);
-          opacity: 0.7;
-        }
-
-        .loading-indicator {
-          display: flex;
+        
+        .container {
+          display: flex; 
+          align-items: center; 
           justify-content: center;
-          margin-top: 1rem;
+          min-height: 100vh; 
+          padding: 1rem;
         }
-
-        .spinner {
-          width: 24px;
-          height: 24px;
-          border: 2px solid var(--border);
-          border-top: 2px solid var(--primary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
+        
+        .content-wrapper { 
+          width: 100%; 
+          max-width: 800px; 
         }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        
+        .title {
+          font-size: clamp(4rem, 15vw, 9rem); 
+          font-weight: 700;
+          text-align: center; 
+          color: var(--text-muted); 
+          margin-bottom: 2.5rem;
         }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-          .container {
-            padding: 1rem 0.5rem;
-          }
-          
-          .title {
-            margin-bottom: 0.5rem;
-          }
-          
-          .subtitle {
-            margin-bottom: 2rem;
-          }
-          
-          .search-input {
-            padding: 1rem 1.25rem;
-            border-radius: 1.25rem;
-          }
+        
+        .search-input {
+          width: 100%; 
+          padding: 1.25rem;
+          font-size: clamp(1.25rem, 4vw, 2rem); 
+          font-weight: 500;
+          text-align: center; 
+          background-color: var(--surface);
+          border: 2px solid var(--text-muted); 
+          border-radius: 1.5rem;
+          color: var(--text); 
+          resize: none; 
+          overflow: hidden;
+          line-height: 1.6; 
+          box-sizing: border-box;
+          transition: height 0.2s ease, border-color 0.2s ease;
         }
-
-        /* Dark mode enhancements */
-        @media (prefers-color-scheme: dark) {
-          .search-input {
-            background-color: rgba(22, 27, 34, 0.8);
-            backdrop-filter: blur(10px);
-          }
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-          .title {
-            -webkit-text-fill-color: var(--text);
-            background: none;
-          }
-          
-          .search-input {
-            border-width: 3px;
-          }
-        }
-
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-          .search-input {
-            transition: none;
-          }
-          
-          .spinner {
-            animation: none;
-          }
+        
+        .search-input:focus { 
+          outline: none; 
+          border-color: var(--primary); 
         }
       `}</style>
     </>
