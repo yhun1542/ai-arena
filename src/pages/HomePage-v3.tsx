@@ -38,19 +38,16 @@ export default function HomePage() {
       <main className="container">
         <div className="contentWrapper">
           <h1 className="title">Synapse</h1>
-          <form onSubmit={handleSubmit} className="form">
-            <div className="inputWrapper">
-              <Search className="searchIcon" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
-                className="searchInput"
-              />
-            </div>
-            <button type="submit" disabled={isBusy} className="searchButton">
-              {isBusy ? '분석 중...' : '결론 도출'}
+          <form onSubmit={handleSubmit} className="search-bar">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="검색어를 입력하세요..."
+              className="search-input"
+            />
+            <button type="submit" disabled={isBusy} className="search-button">
+              <Search size={24} />
             </button>
           </form>
         </div>
@@ -77,56 +74,76 @@ export default function HomePage() {
           justify-content: center;
           min-height: 100vh;
           padding: 1rem;
+          margin-top: 5vh;
         }
         .contentWrapper {
           width: 100%;
-          max-width: 800px;
+          max-width: 500px;
           text-align: center;
         }
         .title {
           font-size: clamp(4rem, 15vw, 9rem);
           font-weight: 700;
-          color: var(--text-muted);
-          margin-bottom: 2.5rem;
+          background: linear-gradient(135deg, #4A90E2, #9B59B6, #E91E63);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 25px;
         }
-        .form {
-          width: 100%;
-        }
-        .inputWrapper {
+        
+        /* 검색창과 아이콘을 함께 묶는 영역 */
+        .search-bar {
           position: relative;
           width: 100%;
+          max-width: 500px;
         }
-        .searchInput {
+        
+        /* 실제 텍스트를 입력하는 검색창 */
+        .search-input {
           width: 100%;
-          padding: 1.25rem 1.5rem 1.25rem 3.5rem; /* Left padding for icon */
-          font-size: clamp(1.1rem, 4vw, 1.5rem);
-          background-color: var(--surface);
+          height: 50px;
+          padding: 0 60px 0 20px;
           border: 2px solid var(--text-muted);
-          border-radius: 1.5rem;
+          border-radius: 25px;
+          font-size: 1rem;
+          background-color: var(--surface);
           color: var(--text);
           box-sizing: border-box;
+          transition: all 0.3s ease;
         }
-        .searchIcon {
+        
+        /* 검색창 호버 및 포커스 효과 */
+        .search-input:hover,
+        .search-input:focus {
+          border-color: var(--primary);
+          box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+          outline: none;
+        }
+        
+        /* 돋보기 아이콘 버튼 */
+        .search-button {
           position: absolute;
-          left: 1.25rem;
+          right: 10px;
           top: 50%;
           transform: translateY(-50%);
-          color: var(--text-muted);
-        }
-        .searchButton {
-          margin-top: 1rem;
-          width: 100%;
-          padding: 1rem;
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: white;
-          background-color: var(--primary);
+          background: none;
           border: none;
-          border-radius: 1.25rem;
           cursor: pointer;
+          padding: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          transition: color 0.3s ease;
         }
-        .searchButton:disabled {
+        
+        .search-button:hover {
+          color: var(--primary);
+        }
+        
+        .search-button:disabled {
           opacity: 0.5;
+          cursor: not-allowed;
         }
       `}</style>
     </>
