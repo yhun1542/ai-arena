@@ -1,36 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [isBusy, setIsBusy] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setQuery(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
-  };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!query.trim() || isBusy) return;
     
     setIsBusy(true);
@@ -46,89 +24,101 @@ export default function HomePage() {
   return (
     <>
       <main className="container">
-        <div className="content-wrapper">
+        <div className="contentWrapper">
           <h1 className="title">Synapse</h1>
-          <form onSubmit={handleSubmit}>
-            <textarea
-              ref={textareaRef}
-              value={query}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
-              className="search-input"
-              rows={1}
-            />
+          <form onSubmit={handleSubmit} className="form">
+            <div className="inputWrapper">
+              <Search className="searchIcon" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="최고의 답을 찾기 위한 여정을 시작하세요."
+                className="searchInput"
+              />
+            </div>
+            <button type="submit" disabled={isBusy} className="searchButton">
+              {isBusy ? '분석 중...' : '결론 도출'}
+            </button>
           </form>
         </div>
       </main>
 
       <style jsx global>{`
-        @font-face {
-          font-family: 'GmarketSans';
-          font-weight: 500;
-          src: url('/fonts/GmarketSansMedium.otf') format('opentype');
-        }
+        /* Global styles like fonts and colors remain the same */
         @font-face {
           font-family: 'GmarketSans';
           font-weight: 700;
           src: url('/fonts/GmarketSansBold.otf') format('opentype');
         }
-
         :root {
-          --primary: #4A90E2; 
-          --background: #0D1117; 
-          --surface: #161B22;
-          --text: #E6EDF3; 
-          --text-muted: #8B949E;
+          --primary: #4A90E2; --background: #0D1117; --surface: #161B22;
+          --text: #E6EDF3; --text-muted: #8B949E;
         }
-        
         body {
           background-color: var(--background);
           color: var(--text);
           font-family: 'GmarketSans', sans-serif;
         }
-        
+
+        /* Layout Fixes */
         .container {
-          display: flex; 
-          align-items: center; 
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           justify-content: center;
-          min-height: 100vh; 
+          min-height: 100vh;
           padding: 1rem;
         }
-        
-        .content-wrapper { 
-          width: 100%; 
-          max-width: 800px; 
+        .contentWrapper {
+          width: 100%;
+          max-width: 800px;
+          text-align: center;
         }
-        
         .title {
-          font-size: clamp(4rem, 15vw, 9rem); 
+          font-size: clamp(4rem, 15vw, 9rem);
           font-weight: 700;
-          text-align: center; 
-          color: var(--text-muted); 
+          color: var(--text-muted);
           margin-bottom: 2.5rem;
         }
-        
-        .search-input {
-          width: 100%; 
-          padding: 1.25rem;
-          font-size: clamp(1.25rem, 4vw, 2rem); 
-          font-weight: 500;
-          text-align: center; 
-          background-color: var(--surface);
-          border: 2px solid var(--text-muted); 
-          border-radius: 1.5rem;
-          color: var(--text); 
-          resize: none; 
-          overflow: hidden;
-          line-height: 1.6; 
-          box-sizing: border-box;
-          transition: height 0.2s ease, border-color 0.2s ease;
+        .form {
+          width: 100%;
         }
-        
-        .search-input:focus { 
-          outline: none; 
-          border-color: var(--primary); 
+        .inputWrapper {
+          position: relative;
+          width: 100%;
+        }
+        .searchInput {
+          width: 100%;
+          padding: 1.25rem 1.5rem 1.25rem 3.5rem; /* Left padding for icon */
+          font-size: clamp(1.1rem, 4vw, 1.5rem);
+          background-color: var(--surface);
+          border: 2px solid var(--text-muted);
+          border-radius: 1.5rem;
+          color: var(--text);
+          box-sizing: border-box;
+        }
+        .searchIcon {
+          position: absolute;
+          left: 1.25rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+        }
+        .searchButton {
+          margin-top: 1rem;
+          width: 100%;
+          padding: 1rem;
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: white;
+          background-color: var(--primary);
+          border: none;
+          border-radius: 1.25rem;
+          cursor: pointer;
+        }
+        .searchButton:disabled {
+          opacity: 0.5;
         }
       `}</style>
     </>
