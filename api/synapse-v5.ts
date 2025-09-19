@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // ===== 타입 정의 =====
 interface SynapseResult {
@@ -360,16 +360,16 @@ function evaluateResponses(query: string, finalRound: AIResponse[]): {
 }
 
 // ===== 메인 핸들러 =====
-export default async function handler(req: NextRequest) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { query, useAdvanced = false } = await req.json();
+    const { query, useAdvanced = false } = req.body;
     
     if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
+      return res.status(400).json({ error: 'Query is required' });
     }
 
     const startTime = Date.now();
@@ -413,13 +413,13 @@ export default async function handler(req: NextRequest) {
       content: metaJudge.finalAnswer,
     };
 
-    return NextResponse.json(result);
+    return res.status(200).json(result);
     
   } catch (error) {
     console.error('Synapse v5 error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
