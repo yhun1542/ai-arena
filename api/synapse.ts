@@ -1,6 +1,6 @@
 // /pages/api/synapse.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { runDirectSynapseProcess } from '@/lib/direct-synapse';
+import { runDirectSynapseProcess } from '../src/lib/direct-synapse';
 
 export default async function handler(
   request: VercelRequest,
