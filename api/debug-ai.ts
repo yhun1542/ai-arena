@@ -114,7 +114,7 @@ export default async function handler(
               'anthropic-version': '2023-06-01',
             },
             body: JSON.stringify({
-              model: 'claude-3-5-sonnet-20241022',
+              model: 'claude-3-5-sonnet-20240620',
               max_tokens: 50,
               messages: [
                 {
@@ -160,7 +160,7 @@ export default async function handler(
               'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
             },
             body: JSON.stringify({
-              model: 'grok-beta',
+              model: 'grok-3',
               messages: [{ role: 'user', content: testPrompt }],
               max_tokens: 50,
             }),

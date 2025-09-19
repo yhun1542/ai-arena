@@ -95,15 +95,15 @@ interface SynapseResult {
 const STANDARD_MODELS = {
   openai: 'gpt-4o',
   google: 'gemini-1.5-pro',
-  anthropic: 'claude-3-5-sonnet-20241022',
-  xai: 'grok-beta',
+  anthropic: 'claude-3-5-sonnet-20240620',
+  xai: 'grok-3',
 };
 
 const ADVANCED_MODELS = {
   openai: 'gpt-4o', // 현재 최고 모델
   google: 'gemini-1.5-pro', // 향후 deepthink 버전으로 업그레이드
-  anthropic: 'claude-3-5-sonnet-20241022',
-  xai: 'grok-beta', // 향후 heavy 버전으로 업그레이드
+  anthropic: 'claude-3-5-sonnet-20240620',
+  xai: 'grok-3', // 최신 Grok 모델
 };
 
 const TEAM_INFO = {
