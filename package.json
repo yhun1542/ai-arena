@@ -14,7 +14,9 @@
     "check:viewport:fix": "node scripts/checkViewport.cjs --fix",
     "check:api": "node scripts/checkAPI.cjs",
     "check:api:quick": "node scripts/checkAPI.cjs --skip-api",
-    "check:all": "npm run check:viewport && npm run check:api"
+    "check:responsive": "node scripts/checkResponsive.cjs",
+    "check:responsive:fix": "node scripts/checkResponsive.cjs --fix",
+    "check:all": "npm run check:viewport && npm run check:responsive && npm run check:api"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

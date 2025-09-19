@@ -215,7 +215,7 @@
 
 .content-wrapper {
   width: 100%;
-  max-width: 800px;
+  max-width: 50.00rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -344,4 +344,116 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+
+/* 모바일 대응 스타일 */
+@media (max-width: 768px) {
+  /* 컨테이너 및 레이아웃 */
+  .container {
+    padding: 1rem;
+  }
+  
+  .content-wrapper {
+    max-width: 100%;
+  }
+  
+  /* 제목 크기 조정 */
+  .title {
+    font-size: 6rem; /* 12rem → 6rem */
+  }
+  
+  .title-container {
+    margin-bottom: 2rem; /* 3rem → 2rem */
+  }
+  
+  .brain-icon {
+    width: 4rem; /* 8rem → 4rem */
+    height: 4rem;
+    top: -0.5rem;
+    right: -1rem;
+  }
+  
+  /* 검색 입력 */
+  .search-input {
+    padding: 1rem 1.5rem; /* 1.5rem 2rem → 1rem 1.5rem */
+    font-size: 1.125rem; /* 1.5rem → 1.125rem */
+  }
+  
+  .search-button {
+    width: 3rem; /* 3.5rem → 3rem */
+    height: 3rem;
+    right: 0.75rem; /* 1rem → 0.75rem */
+  }
+  
+  /* 텍스트 영역 */
+  .synapse-textarea-enhanced {
+    padding: 1rem 4rem 1rem 1.25rem; /* 패딩 축소 */
+    font-size: 1.125rem; /* 1.375rem → 1.125rem */
+  }
+  
+  .synapse-search-button {
+    width: 3rem; /* 3.5rem → 3rem */
+    height: 3rem;
+  }
+  
+  /* 카드 스타일 */
+  .synapse-card {
+    padding: 1rem; /* 1.5rem → 1rem */
+    margin: 0.5rem; /* 여백 추가 */
+  }
+}
+
+@media (max-width: 480px) {
+  /* 작은 모바일 화면 대응 */
+  .container {
+    padding: 0.75rem;
+  }
+  
+  /* 제목 더 작게 */
+  .title {
+    font-size: 4rem; /* 6rem → 4rem */
+  }
+  
+  .brain-icon {
+    width: 3rem; /* 4rem → 3rem */
+    height: 3rem;
+    top: -0.25rem;
+    right: -0.75rem;
+  }
+  
+  /* 검색 입력 더 작게 */
+  .search-input {
+    padding: 0.875rem 1.25rem; /* 더 축소 */
+    font-size: 1rem; /* 1.125rem → 1rem */
+  }
+  
+  .search-button {
+    width: 2.75rem; /* 3rem → 2.75rem */
+    height: 2.75rem;
+    right: 0.625rem;
+  }
+  
+  /* 텍스트 영역 더 작게 */
+  .synapse-textarea-enhanced {
+    padding: 0.875rem 3.5rem 0.875rem 1rem;
+    font-size: 1rem; /* 1.125rem → 1rem */
+  }
+  
+  .synapse-search-button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  
+  /* 카드 스타일 더 축소 */
+  .synapse-card {
+    padding: 0.75rem; /* 1rem → 0.75rem */
+    margin: 0.25rem;
+  }
+  
+  /* 버튼 크기 조정 */
+  .synapse-button {
+    padding: 0.625rem 1.25rem; /* 0.75rem 1.5rem → 축소 */
+    font-size: 0.875rem;
+  }
 }

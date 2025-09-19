@@ -16,15 +16,15 @@ export default function TableView({ data }: TableViewProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="overflow-x-auto"
+      className="overflow-x-auto rounded-lg"
     >
-      <table className="w-full border-collapse bg-gray-800 rounded-lg overflow-hidden">
+      <table className="w-full border-collapse bg-gray-800 rounded-lg overflow-hidden min-w-full">
         <thead>
           <tr className="bg-gray-700">
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="px-6 py-4 text-left text-sm font-semibold text-gray-200 border-b border-gray-600"
+                className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-200 border-b border-gray-600"
               >
                 {header}
               </th>
@@ -43,7 +43,7 @@ export default function TableView({ data }: TableViewProps) {
               {row.map((cell, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className="px-6 py-4 text-sm text-gray-300 border-b border-gray-600"
+                  className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-300 border-b border-gray-600"
                 >
                   {cell}
                 </td>

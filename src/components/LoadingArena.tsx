@@ -30,10 +30,10 @@ export default function LoadingArena() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
-      <div className="text-center space-y-8">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="text-center space-y-6 sm:space-y-8">
         {/* AI 캐릭터 그리드 */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {characters.map((char, i) => (
             <motion.div
               key={char.name}
@@ -42,7 +42,7 @@ export default function LoadingArena() {
               transition={{ delay: i * 0.3, duration: 0.5 }}
               className="relative"
             >
-              <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${char.color} p-1`}>
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br ${char.color} p-1`}>
                 <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
                   <span className="text-white font-bold text-lg">{char.name[0]}</span>
                 </div>
