@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { Search } from 'lucide-react';
 
 export default function HomePage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [isBusy, setIsBusy] = useState(false);
 
@@ -23,17 +23,16 @@ export default function HomePage() {
       };
       
       // 결과 페이지로 이동
-      navigate('/synapse/result', { 
-        state: { 
-          result: dummyResult.answer, 
-          query: query.trim(),
-          metadata: {
-            timestamp: dummyResult.timestamp,
-            processingTime: dummyResult.processingTime,
-            model: dummyResult.model
-          }
-        } 
-      });
+      sessionStorage.setItem('synapseResult', JSON.stringify({
+        result: dummyResult.answer, 
+        query: query.trim(),
+        metadata: {
+          timestamp: dummyResult.timestamp,
+          processingTime: dummyResult.processingTime,
+          model: dummyResult.model
+        }
+      }));
+      router.push('/synapse/result');
     } catch (error) {
       console.error('처리 오류:', error);
       setIsBusy(false);
