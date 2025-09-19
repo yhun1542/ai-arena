@@ -32,7 +32,7 @@ export default function HomePage() {
     try {
       console.log('🚀 Synapse 요청 시작:', query);
       
-      const response = await fetch('/api/synapse-v3', {
+      const response = await fetch('/api/synapse-v4', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
