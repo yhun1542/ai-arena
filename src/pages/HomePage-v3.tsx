@@ -15,7 +15,7 @@ export default function HomePage() {
     try {
       // Navigate to results page with query
       // API 호출 테스트
-      const response = await fetch('/api/synapse-direct', {
+      const response = await fetch('/api/synapse-simple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: query.trim() })
@@ -23,7 +23,7 @@ export default function HomePage() {
       
       if (response.ok) {
         const result = await response.json();
-        navigate('/synapse/result', { state: { result: result.result, query: query.trim() } });
+        navigate('/synapse/result', { state: { result: result.data, query: query.trim() } });
       } else {
         throw new Error('API 호출 실패');
       }
