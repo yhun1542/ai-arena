@@ -1,7 +1,14 @@
 {
   "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    },
     "api/**/*.ts": {
-      "includeFiles": "src/lib/**/*"
+      "runtime": "nodejs18.x"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
