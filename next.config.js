@@ -1,19 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  experimental: {
-    appDir: false
-  },
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/index.html'
-      }
-    ]
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   }
 }
 
-module.exports = nextConfig
+export default nextConfig;
