@@ -94,14 +94,14 @@ interface SynapseResult {
 // ===== 상수 정의 =====
 const STANDARD_MODELS = {
   openai: 'gpt-4o',
-  google: 'gemini-1.5-pro',
+  google: 'gemini-1.5-flash',
   anthropic: 'claude-sonnet-4-20250514',
   xai: 'grok-3',
 };
 
 const ADVANCED_MODELS = {
   openai: 'gpt-4o', // 현재 최고 모델
-  google: 'gemini-1.5-pro', // 향후 deepthink 버전으로 업그레이드
+   google: 'gemini-1.5-pro', // 더 강력한 모델드
   anthropic: 'claude-sonnet-4-20250514',
   xai: 'grok-3', // 최신 Grok 모델
 };
@@ -174,6 +174,9 @@ async function callGemini(prompt: string, model: string): Promise<AIResponse> {
     const modelName = model.includes('gemini') ? model : 'gemini-1.5-pro';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15초 타임아웃
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -190,7 +193,10 @@ async function callGemini(prompt: string, model: string): Promise<AIResponse> {
           maxOutputTokens: 2000,
         },
       }),
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
