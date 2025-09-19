@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Node.js 런타임 강제 (벤더 SDK/HTTP 모듈 호환성)
 export const runtime = 'nodejs';
@@ -518,8 +518,8 @@ async function processTournamentMode(
 
 // 메인 핸들러
 export default async function handler(
-  request: VercelRequest,
-  response: VercelResponse,
+  request: NextApiRequest,
+  response: NextApiResponse,
 ) {
   // CORS 헤더 설정
   response.setHeader('Access-Control-Allow-Origin', '*');
