@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { callOpenAI } from '../../lib/lib/ai-clients/openai';
+import { callOpenAI } from '../lib/ai-clients/openai';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {

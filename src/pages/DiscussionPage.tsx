@@ -119,13 +119,13 @@ export default function DiscussionPage() {
               transition={{ duration: 0.4 }}
             >
               <Card className="bg-gray-800 border-gray-700">
-                <CardHeader>
+                <CardHeader className="">
                   <CardTitle className="flex items-center space-x-2 text-blue-400">
                     <Bot className="h-5 w-5" />
                     <span>{t('discussionTitle')}</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="">
                   <div className="space-y-4">
                     {/* 상태 표시 */}
                     <div className="flex items-center space-x-2">
@@ -170,6 +170,7 @@ export default function DiscussionPage() {
                   <Button 
                     onClick={goBack} 
                     variant="outline" 
+                    size="default"
                     className="flex items-center space-x-2"
                   >
                     <Home className="h-4 w-4" />
@@ -178,6 +179,8 @@ export default function DiscussionPage() {
                   <Button 
                     onClick={handleRetry} 
                     disabled={isStreaming}
+                    variant="default"
+                    size="default"
                     className="flex items-center space-x-2"
                   >
                     <RefreshCw className={`h-4 w-4 ${isStreaming ? 'animate-spin' : ''}`} />

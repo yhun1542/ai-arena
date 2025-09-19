@@ -313,7 +313,6 @@ export async function runSynapseProcessV2(options: SynapseOptions): Promise<Syna
     
     // 최종 답변 파싱
     const finalAnswer = parseFinalAnswer(bestResponse);
-    finalAnswer.content = bestResponse;
     
     const totalTime = Date.now() - startTime;
     
@@ -382,6 +381,7 @@ function parseFinalAnswer(response: string) {
       "실행 계획 수립",
       "리스크 요소 점검",
       "성과 측정 지표 설정"
-    ]
+    ],
+    content: response
   };
 }

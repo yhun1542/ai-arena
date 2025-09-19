@@ -6,6 +6,7 @@ interface SynapseResult {
     evidence: string[];
     sources: string[];
     checkList: string[];
+    content: string;
   };
   teams: Array<{
     name: string;
@@ -21,11 +22,11 @@ interface SynapseResult {
     content: string;
     round: number;
   }>;
-  metadata: {
-    processingTime: string;
-    totalRounds: number;
-    complexity: 'standard' | 'advanced';
-  };
+    metadata: {
+      processingTime: number;
+      totalRounds: number;
+      complexity: 'standard' | 'advanced';
+    };
 }
 
 export function generateDynamicFallback(query: string, isComplex: boolean): SynapseResult {
@@ -145,7 +146,8 @@ export function generateDynamicFallback(query: string, isComplex: boolean): Syna
       summary,
       evidence,
       sources,
-      checkList
+      checkList,
+      content: summary.join(' ')
     },
     teams: [
       {
@@ -203,7 +205,7 @@ export function generateDynamicFallback(query: string, isComplex: boolean): Syna
       }
     ],
     metadata: {
-      processingTime: `${(Math.random() * 3 + 5).toFixed(1)}초`,
+      processingTime: Math.floor(Math.random() * 3000 + 5000),
       totalRounds: 4,
       complexity: isComplex ? 'advanced' as const : 'standard' as const
     }
