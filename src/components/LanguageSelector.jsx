@@ -15,23 +15,24 @@ const LanguageSelector = () => {
   };
 
   return (
-    <div className="relative inline-block text-left">
-      <div className="flex items-center space-x-2">
+    <div className="relative inline-block text-left w-full sm:w-auto">
+      {/* 모바일 우선 수직 레이아웃 */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
         {languages.map((language) => (
           <button
             key={language.code}
             onClick={() => changeLanguage(language.code)}
             className={`
-              flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+              flex items-center justify-center sm:justify-start space-x-2 px-4 py-3 min-h-[44px] rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900
               ${i18n.language === language.code 
-                ? 'bg-blue-100 text-blue-800 border-2 border-blue-300' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-2 border-transparent'
+                ? 'bg-blue-600 text-white border-2 border-blue-500 focus:ring-blue-500 shadow-lg' 
+                : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border-2 border-gray-700 hover:border-gray-600 focus:ring-gray-500'
               }
             `}
             title={language.name}
           >
-            <span className="text-lg">{language.flag}</span>
-            <span className="hidden sm:inline">{language.name}</span>
+            <span className="text-xl">{language.flag}</span>
+            <span className="block sm:hidden md:inline font-medium">{language.name}</span>
           </button>
         ))}
       </div>
