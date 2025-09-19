@@ -1,9 +1,11 @@
 {
+  "functions": {
+    "pages/api/**/*.ts": {
+      "runtime": "@vercel/node",
+      "maxDuration": 300
+    }
+  },
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
@@ -11,7 +13,7 @@
   ],
   "headers": [
     {
-      "source": "/assets/(.*\\.woff2?)",
+      "source": "/fonts/(.*\\.woff2?)",
       "headers": [
         {
           "key": "Content-Type",
@@ -20,7 +22,7 @@
       ]
     },
     {
-      "source": "/assets/(.*\\.ttf)",
+      "source": "/fonts/(.*\\.ttf)",
       "headers": [
         {
           "key": "Content-Type", 
@@ -29,7 +31,7 @@
       ]
     },
     {
-      "source": "/assets/(.*\\.otf)",
+      "source": "/fonts/(.*\\.otf)",
       "headers": [
         {
           "key": "Content-Type",
