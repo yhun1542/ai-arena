@@ -14,7 +14,19 @@ export default function HomePage() {
     setIsBusy(true);
     try {
       // Navigate to results page with query
-      navigate(`/synapse/result?query=${encodeURIComponent(query.trim())}`);
+      // API 호출 테스트
+      const response = await fetch('/api/synapse-simple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query.trim() })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        navigate('/synapse/result', { state: { result: result.data, query: query.trim() } });
+      } else {
+        throw new Error('API 호출 실패');
+      }
     } catch (error) {
       console.error('Navigation error:', error);
       setIsBusy(false);
