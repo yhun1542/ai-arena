@@ -22,6 +22,43 @@ import {
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
+// 처리 시간 계산 유틸리티 함수
+function calculateProcessingTime(processingTime: any): string {
+  // 입력값이 존재하지 않거나 유효하지 않은 경우
+  if (!processingTime) {
+    return "계산 중...";
+  }
+
+  // 문자열인 경우 (예: "15.3초")
+  if (typeof processingTime === 'string') {
+    // 이미 포맷된 문자열인 경우 그대로 반환
+    if (processingTime.includes('초')) {
+      return processingTime;
+    }
+    // 숫자 문자열인 경우 파싱 시도
+    const parsed = parseFloat(processingTime);
+    if (!isNaN(parsed)) {
+      return `${parsed.toFixed(1)}초`;
+    }
+  }
+
+  // 숫자인 경우
+  if (typeof processingTime === 'number') {
+    if (isNaN(processingTime)) {
+      return "오류";
+    }
+    // 1000보다 큰 경우 밀리초로 간주하고 초로 변환
+    if (processingTime > 1000) {
+      return `${(processingTime / 1000).toFixed(1)}초`;
+    }
+    // 그 외에는 이미 초 단위로 간주
+    return `${processingTime.toFixed(1)}초`;
+  }
+
+  // 그 외의 경우
+  return "알 수 없음";
+}
+
 interface AITeamResult {
   name: string;
   model: string;
@@ -236,7 +273,7 @@ export default function SynapseResultPage() {
               <div className="flex items-center gap-4 mt-4 text-sm text-synapse-text-muted">
                 <span>세션: {id?.slice(-8)}</span>
                 <span>•</span>
-                <span>처리 시간: {(result.metadata.processingTime / 1000).toFixed(1)}초</span>
+                <span>처리 시간: {calculateProcessingTime(result.metadata.processingTime)}</span>
                 <span>•</span>
                 <span>{result.metadata.totalRounds}라운드 완료</span>
               </div>
@@ -274,14 +311,31 @@ export default function SynapseResultPage() {
                     <BarChart2 className="w-6 h-6 text-yellow-500" />
                     주요 근거
                   </h3>
-                  <ul className="space-y-2">
+                  <div className="space-y-4">
                     {result.finalAnswer.evidence.map((evidence, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <span className="w-2 h-2 bg-synapse-primary rounded-full mt-2 flex-shrink-0" />
-                        <span>{evidence}</span>
-                      </li>
+                      <div key={index} className="p-4 bg-synapse-surface/30 rounded-lg border border-synapse-border">
+                        <div className="prose prose-synapse max-w-none">
+                          <ReactMarkdown
+                            components={{
+                              h1: ({children}) => <h1 className="text-xl font-bold text-synapse-text mb-3">{children}</h1>,
+                              h2: ({children}) => <h2 className="text-lg font-bold text-synapse-text mb-2">{children}</h2>,
+                              h3: ({children}) => <h3 className="text-base font-bold text-synapse-text mb-2">{children}</h3>,
+                              p: ({children}) => <p className="text-synapse-text mb-2 leading-relaxed">{children}</p>,
+                              ul: ({children}) => <ul className="list-disc list-inside space-y-1 text-synapse-text ml-4">{children}</ul>,
+                              ol: ({children}) => <ol className="list-decimal list-inside space-y-1 text-synapse-text ml-4">{children}</ol>,
+                              li: ({children}) => <li className="text-synapse-text">{children}</li>,
+                              strong: ({children}) => <strong className="font-bold text-synapse-primary">{children}</strong>,
+                              em: ({children}) => <em className="italic text-synapse-text-muted">{children}</em>,
+                              code: ({children}) => <code className="bg-synapse-bg px-1 py-0.5 rounded text-sm font-mono text-synapse-primary">{children}</code>,
+                              blockquote: ({children}) => <blockquote className="border-l-4 border-synapse-primary pl-4 italic text-synapse-text-muted">{children}</blockquote>,
+                            }}
+                          >
+                            {evidence}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
 
                 <div className="mb-6">
