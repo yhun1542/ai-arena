@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/synapse-direct": {
+      "maxDuration": 300
+    },
+    "/api/synapse-simple": {},
+    "/api/synapse-mega": {}
+  }
+}

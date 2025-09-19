@@ -1,0 +1,10 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/": "pages/index.html",
+  "/api/synapse-direct": "pages/api/synapse-direct.js",
+  "/api/synapse-simple": "pages/api/synapse-simple.js",
+  "/api/synapse-mega": "pages/api/synapse-mega.js",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
+}
