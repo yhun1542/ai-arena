@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { callOpenAI } from '../lib/ai-clients/openai';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { callOpenAI } from '../../lib/lib/ai-clients/openai';
 
-export default async function handler(request: NextApiRequest, response: NextApiResponse) {
+export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Method not allowed' });
   }
