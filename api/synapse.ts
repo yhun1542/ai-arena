@@ -1,3 +1,4 @@
+// /pages/api/synapse.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { runDirectSynapseProcess } from '../lib/direct-synapse';
 
@@ -15,7 +16,7 @@ export default async function handler(
   }
 
   if (request.method !== 'POST') {
-    return response.status(405).json({ 
+    return response.status(405).json({
       error: 'Method Not Allowed',
       message: 'Only POST requests are supported'
     });
@@ -26,21 +27,21 @@ export default async function handler(
 
     // 입력 검증
     if (!query || typeof query !== 'string') {
-      return response.status(400).json({ 
+      return response.status(400).json({
         error: 'Invalid Input',
         message: 'Query is required and must be a string'
       });
     }
 
     if (query.length < 10) {
-      return response.status(400).json({ 
+      return response.status(400).json({
         error: 'Query Too Short',
         message: 'Query must be at least 10 characters long'
       });
     }
 
     if (query.length > 2000) {
-      return response.status(400).json({ 
+      return response.status(400).json({
         error: 'Query Too Long',
         message: 'Query must be less than 2000 characters'
       });
@@ -52,7 +53,7 @@ export default async function handler(
       'research', 'analysis', 'compare', 'strategy', 'system', 'algorithm', 'architecture', 'optimization'
     ];
     
-    const autoDetectedComplex = complexKeywords.some(keyword => 
+    const autoDetectedComplex = complexKeywords.some(keyword =>
       query.toLowerCase().includes(keyword.toLowerCase())
     ) || query.length > 200;
 
@@ -65,14 +66,8 @@ export default async function handler(
       timestamp: new Date().toISOString()
     });
 
-    // 간단한 직접 API 호출 방식으로 변경
-    const result = await runDirectSynapseProcess(query, shouldUseAdvanced, persona);houldUseAdvanced,
-      persona: persona || {
-        level: 'intermediate',
-        tone: 'formal',
-        length: 'detailed'
-      }
-    });
+    // 간단한 직접 API 호출 방식으로 변경 (수정된 부분)
+    const result = await runDirectSynapseProcess(query, shouldUseAdvanced, persona);
 
     // 성공 응답
     return response.status(200).json({
@@ -125,3 +120,4 @@ export default async function handler(
     });
   }
 }
+// 마지막에 있던 불필요한 괄호 제거
